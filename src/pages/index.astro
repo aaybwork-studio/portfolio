@@ -1,0 +1,64 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { projects } from "../content";
+---
+
+<Layout
+  title="Aayush Bhandari — Interaction & UX Designer"
+  description="I make simple, clear, immersive digital experiences. Play the portfolio, or read every project as a page."
+>
+  <!-- Crawlable, screen-reader-accessible entry point. The front door is a canvas,
+       but search engines and assistive tech get the full site here. Visually hidden,
+       becomes visible on keyboard focus. -->
+  <nav class="visually-hidden" aria-label="Site contents">
+    <h1>Aayush Bhandari — Interaction &amp; UX Designer</h1>
+    <p>I make simple, clear, immersive digital experiences.</p>
+    <ul>
+      <li><a href="/resume">Résumé</a></li>
+      {projects.map((p) => (
+        <li>
+          <a href={`/work/${p.slug}`}>{p.title} — {p.tagline}</a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  <!-- Game island. Phaser mounts here client-side only. HUD DOM is injected inside. -->
+  <main id="game-root" class="game-root" aria-label="Interactive portfolio (game)"></main>
+
+  <!-- Non-JS / reduced-experience fallback: real links to everything. -->
+  <noscript>
+    <div class="container fallback">
+      <h2>Read the work</h2>
+      <ul>
+        <li><a href="/resume">Résumé</a></li>
+        {projects.map((p) => (
+          <li><a href={`/work/${p.slug}`}>{p.title} — {p.tagline}</a></li>
+        ))}
+      </ul>
+    </div>
+  </noscript>
+
+  <script>
+    // Browser-only: dynamically import the Phaser bootstrap so it never runs during SSR.
+    import { mountGame } from "../game/index";
+    mountGame("game-root");
+  </script>
+</Layout>
+
+<style>
+  .game-root {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  /* Phaser injects a <canvas>; keep it centered and behind the DOM HUD. */
+  .game-root :global(canvas) {
+    display: block;
+    margin: 0 auto;
+  }
+  .fallback { padding: 40px 20px; }
+  .fallback ul { line-height: 2; }
+</style>

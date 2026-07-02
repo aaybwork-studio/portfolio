@@ -1,0 +1,137 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { checkpointProjects, pitwallProject } from "../content";
+import type { CheckpointProject } from "../content";
+
+interface Props {
+  project: CheckpointProject;
+}
+
+const { project } = Astro.props;
+
+// Other case studies for "Read all work" + footer nav (excludes current project).
+const otherCheckpoints = checkpointProjects.filter((p) => p.slug !== project.slug);
+const otherProjects: { slug: string; title: string }[] = [
+  ...otherCheckpoints.map((p) => ({ slug: p.slug, title: p.title })),
+  { slug: pitwallProject.slug, title: pitwallProject.title },
+];
+---
+
+<Layout title={`${project.title} — Aayush Bhandari`} description={project.oneLiner}>
+  <div class="container page">
+    <nav class="top-nav mono">
+      <a href="/">Home</a>
+      <span aria-hidden="true">/</span>
+      <a href="/resume">Résumé</a>
+      <span aria-hidden="true">/</span>
+      <span class="read-all">
+        Read all work:
+        {otherProjects.map((p, i) => (
+          <>
+            <a href={`/work/${p.slug}`}>{p.title}</a>
+            {i < otherProjects.length - 1 && <span aria-hidden="true">, </span>}
+          </>
+        ))}
+      </span>
+    </nav>
+
+    <header class="case-header">
+      <p class="eyebrow">{project.type}</p>
+      <h1>{project.title}</h1>
+      <p class="tagline mono">{project.tagline}</p>
+      <p class="lead">{project.oneLiner}</p>
+    </header>
+
+    {project.checkpoints.map((checkpoint) => (
+      <section class="checkpoint">
+        <h2>{checkpoint.title}</h2>
+        <p>{checkpoint.body}</p>
+      </section>
+    ))}
+
+    <footer class="case-footer mono">
+      <a href="/">Home</a>
+      <a href="/resume">Résumé</a>
+      {otherProjects.map((p) => (
+        <a href={`/work/${p.slug}`}>{p.title}</a>
+      ))}
+    </footer>
+  </div>
+</Layout>
+
+<style>
+  .page {
+    padding-block: 48px 80px;
+  }
+
+  .top-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5em;
+    font-size: 0.85rem;
+    color: var(--ink-dim);
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 48px;
+  }
+
+  .top-nav span[aria-hidden] {
+    color: var(--line);
+  }
+
+  .read-all {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.25em;
+  }
+
+  .case-header {
+    margin-bottom: 56px;
+  }
+
+  .case-header .eyebrow {
+    margin-bottom: 12px;
+  }
+
+  .case-header h1 {
+    margin: 0 0 16px;
+  }
+
+  .tagline {
+    color: var(--accent);
+    font-size: 0.9rem;
+    margin: 0 0 20px;
+  }
+
+  .lead {
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    max-width: 60ch;
+  }
+
+  .checkpoint {
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+
+  .checkpoint h2 {
+    margin-top: 0;
+    margin-bottom: 12px;
+  }
+
+  .checkpoint p {
+    max-width: 68ch;
+    color: var(--ink);
+  }
+
+  .case-footer {
+    margin-top: 80px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    font-size: 0.85rem;
+  }
+</style>

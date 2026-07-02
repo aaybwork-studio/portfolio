@@ -1,0 +1,174 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { projects } from "../content";
+---
+
+<Layout title="Résumé — Aayush Bhandari" description="Résumé for Aayush Bhandari, Interaction & UX Designer.">
+  <div class="container page">
+    <nav class="top-nav mono no-print">
+      <a href="/">Home</a>
+    </nav>
+
+    <header class="resume-header">
+      <h1>Aayush Bhandari</h1>
+      <p class="role mono">Interaction &amp; UX Designer</p>
+      <p class="tagline">I make simple, clear, immersive digital experiences.</p>
+    </header>
+
+    <section class="contact">
+      <p class="eyebrow">Contact</p>
+      <ul class="contact-list mono">
+        <li><a href="mailto:aayushbhandari.work@gmail.com">aayushbhandari.work@gmail.com</a></li>
+        <li>+91 9810857906</li>
+        <li><a href="https://behance.net/aayushbhandariwork" target="_blank" rel="noopener noreferrer">behance.net/aayushbhandariwork</a></li>
+        <li><a href="https://instagram.com/bykuraaaa" target="_blank" rel="noopener noreferrer">@bykuraaaa</a></li>
+        <li><a href="https://linkedin.com/in/kura" target="_blank" rel="noopener noreferrer">linkedin.com/in/kura</a></li>
+        <li>Noida, India</li>
+        <li>B.Des UX Design, UPES</li>
+      </ul>
+    </section>
+
+    <section class="selected-work">
+      <p class="eyebrow">Selected work</p>
+      <ul class="work-list">
+        {projects.map((project) => (
+          <li class="work-item">
+            <a href={`/work/${project.slug}`} class="work-title">{project.title}</a>
+            <p class="work-type mono">{project.type}</p>
+            <p class="work-tagline">{project.tagline}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</Layout>
+
+<style>
+  .page {
+    padding-block: 48px 80px;
+  }
+
+  .top-nav {
+    font-size: 0.85rem;
+    color: var(--ink-dim);
+    padding-bottom: 24px;
+    margin-bottom: 40px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .resume-header {
+    margin-bottom: 48px;
+  }
+
+  .resume-header h1 {
+    margin: 0 0 8px;
+  }
+
+  .role {
+    color: var(--accent);
+    font-size: 0.9rem;
+    margin: 0 0 16px;
+  }
+
+  .tagline {
+    color: var(--ink-dim);
+    font-size: 1.05rem;
+    max-width: 55ch;
+  }
+
+  .eyebrow {
+    margin-bottom: 16px;
+  }
+
+  section {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+
+  .contact-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+    font-size: 0.88rem;
+  }
+
+  .work-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .work-item {
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .work-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .work-title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    color: var(--ink);
+  }
+
+  .work-title:hover {
+    color: var(--accent);
+  }
+
+  .work-type {
+    color: var(--ink-dim);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 8px 0 6px;
+  }
+
+  .work-tagline {
+    color: var(--ink-dim);
+    margin: 0;
+    max-width: 55ch;
+  }
+
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+
+    :global(body) {
+      background: #fff !important;
+      color: #000 !important;
+    }
+
+    .tagline,
+    .role,
+    .eyebrow,
+    .contact-list,
+    .work-type,
+    .work-tagline {
+      color: #333 !important;
+    }
+
+    a {
+      color: #000 !important;
+      text-decoration: underline;
+    }
+
+    section {
+      border-top-color: #ccc !important;
+    }
+
+    .work-item {
+      border-bottom-color: #ccc !important;
+    }
+  }
+</style>

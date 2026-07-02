@@ -1,0 +1,20 @@
+---
+import CaseStudyLayout from "../../components/CaseStudyLayout.astro";
+import { checkpointProjects } from "../../content";
+import type { CheckpointProject } from "../../content";
+
+export function getStaticPaths() {
+  return checkpointProjects.map((project: CheckpointProject) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+interface Props {
+  project: CheckpointProject;
+}
+
+const { project } = Astro.props;
+---
+
+<CaseStudyLayout project={project} />
