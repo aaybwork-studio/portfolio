@@ -8,6 +8,7 @@ import { BIOMES } from "./config/biomes";
 import { EventBus } from "./EventBus";
 import { HUD } from "./ui/HUD";
 import { ContentPanel } from "./ui/ContentPanel";
+import { WorldOverlay } from "./ui/WorldOverlay";
 import { BootScene } from "./scenes/BootScene";
 import { HeroScene } from "./scenes/HeroScene";
 import { HubScene } from "./scenes/HubScene";
@@ -48,6 +49,13 @@ export function mountGame(parentId = "game-root"): Phaser.Game | undefined {
     },
     scene: [BootScene, HeroScene, HubScene, LevelScene],
   });
+
+  game.events.once(Phaser.Core.Events.READY, () => {
+    const overlayParent = document.getElementById(parentId) ?? document.body;
+    const canvas = game.canvas as HTMLCanvasElement;
+    WorldOverlay.attach(overlayParent, canvas);
+  });
+  game.events.on(Phaser.Core.Events.POST_RENDER, () => WorldOverlay.update());
 
   EventBus.on(EVENTS.navTo, (payload) => {
     const target = (payload as { target?: NavTarget } | undefined)?.target;
