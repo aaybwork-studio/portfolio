@@ -29,6 +29,10 @@ export interface BiomePalette {
 export interface BiomeDef {
   palette: BiomePalette;
   layers: ParallaxLayer[];
+  /** Optional tiled ground art. When present, LevelScene renders a tiled
+   * visual strip (sourced from this tileset frame) on top of the existing,
+   * unchanged collision rect. Absent = keep the plain colored ground rect. */
+  groundTileset?: { path: string; tileSize: number; groundIndex: number };
 }
 
 function layers(sky: number, mid: number, ground: number): ParallaxLayer[] {
@@ -51,7 +55,37 @@ export const BIOMES = {
   // twilight-tech: near-black, orange-red accent, calm cosmic
   orbit: {
     palette: { bg: 0x0b0806, ink: 0xf5efe9, accent: 0xff4500, ground: 0x1a120c },
-    layers: layers(0x0b0806, 0x160f0a, 0x1a120c),
+    layers: [
+      {
+        id: "layer0_sky_far",
+        scrollFactor: 0.0,
+        color: 0x0b0806,
+        path: "assets/backgrounds/layer0_sky_far.png",
+        usePlaceholder: false,
+      },
+      {
+        id: "layer1_sky_moon",
+        scrollFactor: 0.15,
+        color: 0x0b0806,
+        path: "assets/backgrounds/layer1_sky_moon.png",
+        usePlaceholder: false,
+      },
+      {
+        id: "layer2_skyline_mid",
+        scrollFactor: 0.45,
+        color: 0x160f0a,
+        path: "assets/backgrounds/layer2_skyline_mid.png",
+        usePlaceholder: false,
+      },
+      {
+        id: "layer3_buildings_near",
+        scrollFactor: 0.75,
+        color: 0x1a120c,
+        path: "assets/backgrounds/layer3_buildings_near.png",
+        usePlaceholder: false,
+      },
+    ],
+    groundTileset: { path: "assets/tiles/warped_city_tileset.png", tileSize: 16, groundIndex: 272 },
   },
   // warm dusk, soft blue accent, place-based
   "memory-bank": {
@@ -68,6 +102,6 @@ export const BIOMES = {
     palette: { bg: 0x0a0a0a, ink: 0xf7f3ec, accent: 0xe10600, ground: 0x1a1a1a },
     layers: layers(0x0a0a0a, 0x141414, 0x1a1a1a),
   },
-} satisfies Record<string, BiomeDef>;
+} satisfies Record<string, BiomeDef> as Record<"hero" | "hub" | "orbit" | "memory-bank" | "nav-aid" | "pitwall", BiomeDef>;
 
 export type BiomeKey = keyof typeof BIOMES;

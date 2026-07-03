@@ -11,6 +11,8 @@ import { WorldOverlay, makePrompt } from "../ui/WorldOverlay";
 import { EventBus } from "../EventBus";
 import { getProject, isCheckpointProject } from "../../content";
 import type { CheckpointProject } from "../../content";
+import { createBackground } from "../systems/Background";
+import type { Background } from "../systems/Background";
 
 const firstSentence = (s: string) => (s.match(/^.*?[.!?](\s|$)/)?.[0] ?? s).trim();
 
@@ -39,6 +41,7 @@ export class LevelScene extends Phaser.Scene {
   private prompt!: HTMLElement;
   private promptUnsub: (() => void) | null = null;
   private promptCp: CheckpointMarker | null = null;
+  private bg!: Background;
 
   constructor() {
     super(SCENES.level);
@@ -63,19 +66,32 @@ export class LevelScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor(biome.palette.bg);
 
-    for (const layer of biome.layers) {
-      const rect = this.add.rectangle(0, 0, w, h, layer.color);
-      rect.setOrigin(0, 0);
-      rect.setScrollFactor(layer.scrollFactor);
-      if (layer.id === "ground") {
-        rect.setPosition(0, h - WORLD.groundHeight);
-        rect.setSize(w, WORLD.groundHeight);
-      }
-    }
+    this.bg = createBackground(this, project.biome, { sceneWidth: w });
 
+    // Collision body unchanged — plain rect matching the ground band.
     const ground = this.add.rectangle(0, h - WORLD.groundHeight, w, WORLD.groundHeight, biome.palette.ground);
     ground.setOrigin(0, 0);
     this.physics.add.existing(ground, true);
+    // Visual ground: colored rect for placeholder biomes (kept as-is), or a
+    // tiled strip of the biome's ground tileset frame layered on top when
+    // present. Physics body above stays authoritative either way.
+    if (!biome.groundTileset) {
+      ground.setFillStyle(biome.palette.ground);
+    } else {
+      ground.setVisible(false);
+      const { tileSize, groundIndex } = biome.groundTileset;
+      const groundSprite = this.add.tileSprite(
+        0,
+        h - WORLD.groundHeight,
+        w,
+        WORLD.groundHeight,
+        "warped-tiles",
+        groundIndex,
+      );
+      groundSprite.setOrigin(0, 0);
+      groundSprite.setTileScale(WORLD.groundHeight / tileSize, WORLD.groundHeight / tileSize);
+      groundSprite.setDepth(-500);
+    }
 
     this.contentPanel = new ContentPanel(document.body);
 
@@ -172,6 +188,7 @@ export class LevelScene extends Phaser.Scene {
 
   update(): void {
     this.player.update();
+    this.bg.update(this.cameras.main);
     this.updateCheckpointPrompt();
   }
 

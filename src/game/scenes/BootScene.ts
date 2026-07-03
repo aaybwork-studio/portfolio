@@ -6,6 +6,7 @@
 import Phaser from "phaser";
 import { SCENES } from "../config/world";
 import { SPRITES } from "../config/sprites";
+import { BIOMES } from "../config/biomes";
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -19,6 +20,26 @@ export class BootScene extends Phaser.Scene {
         frameWidth: def.frameWidth,
         frameHeight: def.frameHeight,
       });
+    }
+
+    // Real parallax background layers, deduped by path (layer id doubles as
+    // the stable texture key). Placeholder layers stay as colored rects.
+    const loadedPaths = new Set<string>();
+    let tilesetLoaded = false;
+    for (const biome of Object.values(BIOMES)) {
+      for (const layer of biome.layers) {
+        if (layer.usePlaceholder || !layer.path) continue;
+        if (loadedPaths.has(layer.path)) continue;
+        loadedPaths.add(layer.path);
+        this.load.image(layer.id, layer.path);
+      }
+      if (biome.groundTileset && !tilesetLoaded) {
+        tilesetLoaded = true;
+        this.load.spritesheet("warped-tiles", biome.groundTileset.path, {
+          frameWidth: biome.groundTileset.tileSize,
+          frameHeight: biome.groundTileset.tileSize,
+        });
+      }
     }
   }
 

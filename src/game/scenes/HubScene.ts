@@ -12,6 +12,8 @@ import { ContentPanel } from "../ui/ContentPanel";
 import { WorldOverlay, makePrompt } from "../ui/WorldOverlay";
 import { EventBus } from "../EventBus";
 import { checkpointProjects, pitwallProject } from "../../content";
+import { createBackground } from "../systems/Background";
+import type { Background } from "../systems/Background";
 
 const KURA_DIALOG = [
   "Hey, I'm Aayush. Interaction and UX designer.",
@@ -38,6 +40,7 @@ export class HubScene extends Phaser.Scene {
   private prompt!: HTMLElement;
   private promptUnsub: (() => void) | null = null;
   private promptTarget: { x: number; y: number } | null = null;
+  private bg!: Background;
 
   constructor() {
     super(SCENES.hub);
@@ -50,15 +53,7 @@ export class HubScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor(biome.palette.bg);
 
-    for (const layer of biome.layers) {
-      const rect = this.add.rectangle(0, 0, w, h, layer.color);
-      rect.setOrigin(0, 0);
-      rect.setScrollFactor(layer.scrollFactor);
-      if (layer.id === "ground") {
-        rect.setPosition(0, h - WORLD.groundHeight);
-        rect.setSize(w, WORLD.groundHeight);
-      }
-    }
+    this.bg = createBackground(this, "hub", { sceneWidth: w });
 
     const ground = this.add.rectangle(0, h - WORLD.groundHeight, w, WORLD.groundHeight, biome.palette.ground);
     ground.setOrigin(0, 0);
@@ -156,6 +151,7 @@ export class HubScene extends Phaser.Scene {
 
   update(): void {
     this.player.update();
+    this.bg.update(this.cameras.main);
     this.updateInteractPrompt();
   }
 

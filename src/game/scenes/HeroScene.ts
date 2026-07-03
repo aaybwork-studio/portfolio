@@ -6,10 +6,13 @@ import { WORLD, SCENES, EVENTS } from "../config/world";
 import { BIOMES } from "../config/biomes";
 import { Player } from "../entities/Player";
 import { EventBus } from "../EventBus";
+import { createBackground } from "../systems/Background";
+import type { Background } from "../systems/Background";
 
 export class HeroScene extends Phaser.Scene {
   private player!: Player;
   private ground!: Phaser.GameObjects.Rectangle;
+  private bg!: Background;
 
   constructor() {
     super(SCENES.hero);
@@ -22,16 +25,9 @@ export class HeroScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor(biome.palette.bg);
 
-    // Parallax layers back-to-front.
-    for (const layer of biome.layers) {
-      const rect = this.add.rectangle(0, 0, w * 1.5, h, layer.color);
-      rect.setOrigin(0, 0);
-      rect.setScrollFactor(layer.scrollFactor);
-      if (layer.id === "ground") {
-        rect.setPosition(0, h - WORLD.groundHeight);
-        rect.setSize(w * 1.5, WORLD.groundHeight);
-      }
-    }
+    // Parallax layers back-to-front (real art where the biome has it,
+    // colored-rect fallback otherwise — see systems/Background.ts).
+    this.bg = createBackground(this, "hero", { sceneWidth: w, placeholderWidthMultiplier: 1.5 });
 
     // Physical ground platform (static body) matching the visual ground band.
     this.ground = this.add.rectangle(0, h - WORLD.groundHeight, w, WORLD.groundHeight, biome.palette.ground);
@@ -80,6 +76,7 @@ export class HeroScene extends Phaser.Scene {
 
   update(): void {
     this.player.update();
+    this.bg.update(this.cameras.main);
 
     if (this.player.x > WORLD.heroWidth - 20) {
       this.scene.start(SCENES.hub);
