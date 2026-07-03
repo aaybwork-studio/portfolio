@@ -1,0 +1,96 @@
+# Spec — Immersive Experience Pass
+
+Date: 2026-07-03
+Status: Approved-pending-review
+Project: Aayush Bhandari portfolio platformer (`/Users/kura/portfolio-game`)
+
+## Goal
+
+Turn the working placeholder-shape skeleton into an immersive, art-driven, Hollow-Knight-flavored experience — for both the playable game and the read-mode pages — without breaking the "one content model, three presentations" architecture or the SEO guarantee.
+
+## Locked decisions
+
+- **Art is now IN.** Placeholder rectangles replaced with real art via the existing `sprites.ts` / `biomes.ts` config seam (`usePlaceholder` → false, fill `path`, drop files in `public/assets/`). No game logic references image paths directly.
+- **Character sprites** (player + Aayush): free **CC0 animated sprite** (walk / idle / jump frames). Aayush = recolor/variant of the same or a second CC0 sprite.
+- **Environments / parallax / props / themed portals**: **Gemini-generated** (`nano-banana-pro` skill), one cohesive art direction.
+- **Art direction**: moody painterly, Hollow-Knight-ish — desaturated depth, silhouette foregrounds, glowing accents, per-biome palette. Palettes already defined in `biomes.ts` drive accent/lighting.
+- **Inventory persistence**: `localStorage` allowed (relaxes brief's "no browser storage"; still no backend/DB). Gifts + resume-collected persist across visits.
+- **Motion**: atmospheric/weighty, tasteful — not arcade-gaudy. Respect `prefers-reduced-motion` (disable non-essential motion, keep functional transitions instant).
+- **No fail states** anywhere (unchanged). Platforming is for exploration/mood; nothing kills the player.
+- Licensing: CC0 / public-domain / self-generated only.
+
+## Art pipeline
+
+1. **Validate generation first (execution step 0).** Generate one test biome background via `nano-banana-pro`. If unavailable/poor, fall back to CC0 web packs (Kenney, OpenGameArt) for environments too. Do not build features assuming gen works until confirmed.
+2. **Per biome** (hero, hub, orbit, memory-bank, nav-aid, pitwall): generate layered parallax art — far sky/space, mid scenery, near foreground occluder — sized for the parallax layers in `biomes.ts`. Moody, per-palette.
+3. **Themed portal props** (PNG w/ transparency): Orbit = rocket; Memory Bank = place-pin/locket; Nav-Aid = wayfinding beacon; PitWall = F1 pit-lane light gantry. Each idles + plays an entry animation.
+4. **Character**: CC0 spritesheet(s) → `public/assets/`, wired through `sprites.ts` (frame size, anim ranges, usePlaceholder=false). Register anims in BootScene when usePlaceholder is false (code path already stubbed).
+5. **Ground / platform tiles**: CC0 tileset or generated, per biome tint.
+6. Keep every asset behind the config seam. `usePlaceholder` stays supported so a missing asset degrades to a rectangle, never a crash.
+
+## New game systems (each a focused module, reused across scenes)
+
+- **`WorldOverlay`** (`src/game/ui/WorldOverlay.ts`) — DOM layer over the canvas. Registers DOM elements pinned to world coordinates; on each frame, projects world→screen via the active camera and positions them. Powers: speech bubbles, floating E-prompts, entity name labels. **Fixes low-res text** (browser-rendered, not canvas) and enables **comic speech bubbles**.
+- **`SpeechBubble`** (via WorldOverlay) — comic bubble with tail anchored to a speaker (Aayush/player), typewriter reveal, advance/close on E or click. Replaces the bottom DialogBox for in-world dialogue. (A bottom panel may remain for long-form ContentPanel body text.)
+- **`TransitionManager`** (`src/game/systems/TransitionManager.ts`) — themed scene transitions. Default: fade/iris. Portal-specific: rocket-launch (Orbit), etc. Fades HUD zone-label in sync. Reduced-motion → instant cut.
+- **`Atmosphere`** (`src/game/systems/Atmosphere.ts`) — per-biome mood: drifting particles/spores, fog gradient, vignette, soft accent glow/light shafts, parallax depth. Reads biome palette. Reduced-motion → static, no drift.
+- **`juice.ts`** (`src/game/systems/juice.ts`) — squash/stretch, land-impact camera shake, dust bursts, weighty momentum helpers, reusable eases. All motion routed through here so reduced-motion is a single switch.
+- **`Interactable`** (`src/game/systems/Interactable.ts`) — mixin/component: proximity detection (WORLD.interactRadius), glow + pulse when in range, floating E-prompt (via WorldOverlay), onInteract callback. Applied uniformly to NPC, checkpoints, portals.
+- **`Inventory`** (`src/game/systems/Inventory.ts`) — session state + `localStorage` sync. Items: `resume` (always present), `orbit-gift`, `memory-bank-gift`, `nav-aid-gift`, `pitwall-gift`. API: `has(id)`, `grant(id)`, `all()`, `onChange(cb)`. Emits via EventBus so HUD/inventory UI update.
+- **`InventoryPanel`** (`src/game/ui/InventoryPanel.ts`) — DOM overlay, opened by `I`/`Tab` key + a HUD button. Grid of owned items; click resume → `/resume`; click gift → detail card (themed micro-copy). Add-item burst animation.
+
+## Feature specs
+
+### Guide narration in levels
+Aayush walks ahead to each checkpoint AND speaks a short intro line (speech bubble) as the player arrives. The checkpoint's full `body` opens in the ContentPanel on E. Intro line = first sentence of the checkpoint body (derived, no new copy written). Guide advances to next checkpoint after the player opens the current one.
+
+### Themed portals (hub)
+Replace plain gate rects with the themed props above. Each: idle animation (rocket exhaust flicker, beacon pulse, gantry lights), Interactable affordance, and on-entry a themed TransitionManager sequence into the level. PitWall portal opens the highlight ContentPanel (blocks) or routes to `/work/pitwall`.
+
+### Back-navigation
+Left edge of a **level** → return to hub (mirror of right-edge exit). Left edge of the **hub** → return to hero. Add left-boundary trigger zones symmetric to existing right-edge ones. A subtle "← back" WorldOverlay hint near left edges.
+
+### Level redesign (non-linear / immersive)
+LevelScene lays out checkpoints across a hand-authored-feeling space, not a flat line: multiple platform elevations, foreground occluders, deep parallax background art, ambient props + light shafts per biome. Checkpoints placed in distinct "places." Optional gentle vertical exploration (jump-up ledges) with no death. Layout data lives in a per-biome layout config so LevelScene stays generic.
+
+### Inventory + gifts
+Completing a project's **full** checkpoint journey (all checkpoints opened) grants that project's themed gift → Inventory (with burst + toast). Resume is a permanent inventory item. Persist via localStorage. A one-click resume affordance remains reachable for hiring managers (HUD keeps a resume shortcut that also lives in inventory).
+Gift names/themes: Orbit = "Orb fragment"; Memory Bank = "locket / place-pin"; Nav-Aid = "wayfinder badge"; PitWall = die-cast **collectible** (never "object").
+
+### Micro-animations (everywhere)
+HUD button hover/press, portal idles, item pickups, panel slide/fade, checkpoint-complete state change, resume-collected glow, inventory-add burst, read-page scroll-reveal + hover. All through `juice.ts` / CSS, gated by reduced-motion.
+
+### HUD refresh
+Crisp key-prompt chips replacing the current faded control-hint. Active-zone highlight. Inventory button. Résumé shortcut. Zone label with transition fade.
+
+## Read-mode pages (make them look real)
+- Extend design-system CSS: type scale, spacing, motion vars, reusable components.
+- `/work/*`: each page themed to its biome palette, big header (tagline/oneLiner), sticky checkpoint index rail, scroll-reveal sections, stat callouts, prev/next project nav, "▶ play this level" back-to-game CTA. Copy still pulled only from content data. **SEO guarantee preserved** — all copy stays server-rendered in HTML.
+- `/resume`: redesigned sections, contact chips, work cards → case studies, print styles.
+
+## Constraints preserved
+- One content model, three presentations. No case-study copy written outside `src/content/*.ts`.
+- SEO: `/work/*` and `/resume` copy present in built HTML (re-verify after redesign).
+- Config seam: no image path in game logic; `usePlaceholder` degrade-safe.
+- Static Astro output, deploy on Vercel.
+
+## Non-goals (this pass)
+- Sound/music.
+- Mobile vertical-scroll layout (separate future pass).
+- Real backend/DB.
+- Fonts remain current placeholders (not this pass, per user).
+
+## Risks / open
+- Gemini gen availability/quality in this environment — mitigated by CC0 fallback (execution step 0).
+- Asset weight — keep backgrounds compressed; Phaser homepage bundle already ~348KB gz, watch total page weight.
+- Character sprite licensing — verify CC0 before use, record source in `public/assets/CREDITS.md`.
+
+## Suggested phase decomposition (for writing-plans)
+1. Art pipeline validation + asset generation/sourcing (backgrounds, character, tiles, portal props) + CREDITS.
+2. Config wiring (`sprites.ts`/`biomes.ts` real paths) + BootScene anim registration + degrade-safe loading.
+3. `WorldOverlay` + `SpeechBubble` + crisp prompts/labels (fixes low-res + speech bubbles).
+4. `Atmosphere` + `juice.ts` + camera feel + character micro-animations.
+5. Themed portals + `TransitionManager` + back-navigation.
+6. Level redesign (non-linear layout configs).
+7. `Inventory` + `InventoryPanel` + gifts + HUD refresh + localStorage.
+8. Read-page redesign + micro-interactions + SEO re-verify.
