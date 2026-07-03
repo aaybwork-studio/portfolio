@@ -150,7 +150,6 @@ export class LevelScene extends Phaser.Scene {
       const dist = Math.abs(this.player.x - cp.x);
       if (dist <= WORLD.interactRadius) {
         this.contentPanel.show({ title: cp.title, body: cp.body });
-        this.aayush.say(firstSentence(cp.body), "Aayush", "Press E to read more");
         if (!cp.opened) {
           cp.opened = true;
           this.advanceGuide();
@@ -192,6 +191,7 @@ export class LevelScene extends Phaser.Scene {
         this.promptUnsub?.();
         this.promptCp = nearest;
         this.promptUnsub = WorldOverlay.track(this.prompt, () => ({ x: this.promptCp!.x, y: this.promptCp!.y }), 44);
+        this.aayush.say(firstSentence(nearest.body), "Aayush");
       }
     } else if (this.promptCp) {
       this.promptUnsub?.();

@@ -9,6 +9,7 @@ import { Player } from "../entities/Player";
 import { KuraNPC } from "../entities/KuraNPC";
 import { DialogBox } from "../ui/DialogBox";
 import { ContentPanel } from "../ui/ContentPanel";
+import { WorldOverlay, makePrompt } from "../ui/WorldOverlay";
 import { EventBus } from "../EventBus";
 import { checkpointProjects, pitwallProject } from "../../content";
 
@@ -34,6 +35,9 @@ export class HubScene extends Phaser.Scene {
   private portals: Portal[] = [];
   private hasTalkedToAayush = false;
   private domRoot!: HTMLElement;
+  private prompt!: HTMLElement;
+  private promptUnsub: (() => void) | null = null;
+  private promptTarget: { x: number; y: number } | null = null;
 
   constructor() {
     super(SCENES.hub);
@@ -107,6 +111,14 @@ export class HubScene extends Phaser.Scene {
 
     this.input.keyboard?.on("keydown-E", () => this.handleInteract());
 
+    WorldOverlay.setCamera(this.cameras.main);
+    this.prompt = makePrompt("E");
+    this.events.once("shutdown", () => {
+      this.promptUnsub?.();
+      this.promptUnsub = null;
+      WorldOverlay.clear();
+    });
+
     EventBus.emit(EVENTS.zoneChanged, { zone: "Hub" });
   }
 
@@ -144,5 +156,35 @@ export class HubScene extends Phaser.Scene {
 
   update(): void {
     this.player.update();
+    this.updateInteractPrompt();
+  }
+
+  private updateInteractPrompt(): void {
+    const candidates: { x: number; y: number }[] = [
+      { x: this.aayush.x, y: this.aayush.y },
+      ...this.portals.map((p) => ({ x: p.x, y: p.rect.y })),
+    ];
+
+    let nearest: { x: number; y: number } | null = null;
+    let nearestDist = Infinity;
+    for (const c of candidates) {
+      const dist = Math.abs(this.player.x - c.x);
+      if (dist <= WORLD.interactRadius && dist < nearestDist) {
+        nearest = c;
+        nearestDist = dist;
+      }
+    }
+
+    if (nearest) {
+      if (nearest !== this.promptTarget) {
+        this.promptUnsub?.();
+        this.promptTarget = nearest;
+        this.promptUnsub = WorldOverlay.track(this.prompt, () => this.promptTarget!, 44);
+      }
+    } else if (this.promptTarget) {
+      this.promptUnsub?.();
+      this.promptUnsub = null;
+      this.promptTarget = null;
+    }
   }
 }

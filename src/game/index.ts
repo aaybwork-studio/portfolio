@@ -50,6 +50,8 @@ export function mountGame(parentId = "game-root"): Phaser.Game | undefined {
     scene: [BootScene, HeroScene, HubScene, LevelScene],
   });
 
+  if (import.meta.env.DEV) (window as unknown as { __game?: Phaser.Game }).__game = game;
+
   game.events.once(Phaser.Core.Events.READY, () => {
     const overlayParent = document.getElementById(parentId) ?? document.body;
     const canvas = game.canvas as HTMLCanvasElement;
