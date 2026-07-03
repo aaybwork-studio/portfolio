@@ -4,11 +4,13 @@
 
 import Phaser from "phaser";
 import { SPRITES } from "../config/sprites";
+import { WorldOverlay, makeBubble } from "../ui/WorldOverlay";
 
 export class KuraNPC {
   readonly scene: Phaser.Scene;
   readonly gameObject: Phaser.GameObjects.Rectangle & { body: Phaser.Physics.Arcade.Body };
   private label: Phaser.GameObjects.Text;
+  private bubbleUnsub?: () => void;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.scene = scene;
@@ -34,6 +36,23 @@ export class KuraNPC {
     return this.gameObject.y;
   }
 
+  get displayHeight(): number {
+    return this.gameObject.displayHeight;
+  }
+
+  /** Show a speech bubble above Aayush. `more` = hint line, e.g. "Press E to read more". */
+  say(text: string, name = "Aayush", more?: string) {
+    this.clearSay();
+    const el = makeBubble(text, name, more);
+    const offset = (this.displayHeight ?? 48) * 0.7;
+    this.bubbleUnsub = WorldOverlay.track(el, () => ({ x: this.x, y: this.y }), offset);
+  }
+
+  clearSay() {
+    this.bubbleUnsub?.();
+    this.bubbleUnsub = undefined;
+  }
+
   /** Tween-walk horizontally to x, calling onArrive when done. */
   walkTo(x: number, onArrive?: () => void): void {
     const distance = Math.abs(x - this.gameObject.x);
@@ -50,6 +69,7 @@ export class KuraNPC {
   }
 
   destroy(): void {
+    this.clearSay();
     this.gameObject.destroy();
     this.label.destroy();
   }

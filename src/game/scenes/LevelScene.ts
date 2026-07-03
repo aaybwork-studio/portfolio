@@ -7,12 +7,16 @@ import { BIOMES } from "../config/biomes";
 import { Player } from "../entities/Player";
 import { KuraNPC } from "../entities/KuraNPC";
 import { ContentPanel } from "../ui/ContentPanel";
+import { WorldOverlay, makePrompt } from "../ui/WorldOverlay";
 import { EventBus } from "../EventBus";
 import { getProject, isCheckpointProject } from "../../content";
 import type { CheckpointProject } from "../../content";
 
+const firstSentence = (s: string) => (s.match(/^.*?[.!?](\s|$)/)?.[0] ?? s).trim();
+
 interface CheckpointMarker {
   x: number;
+  y: number;
   title: string;
   body: string;
   rect: Phaser.GameObjects.Rectangle;
@@ -32,6 +36,9 @@ export class LevelScene extends Phaser.Scene {
   private exitX = 0;
   private project?: CheckpointProject;
   private guideIndex = 0;
+  private prompt!: HTMLElement;
+  private promptUnsub: (() => void) | null = null;
+  private promptCp: CheckpointMarker | null = null;
 
   constructor() {
     super(SCENES.level);
@@ -96,7 +103,7 @@ export class LevelScene extends Phaser.Scene {
         })
         .setOrigin(0.5);
 
-      this.checkpoints.push({ x, title: cp.title, body: cp.body, rect, opened: false });
+      this.checkpoints.push({ x, y: groundY - 40, title: cp.title, body: cp.body, rect, opened: false });
     });
 
     // Exit portal at far right.
@@ -123,6 +130,14 @@ export class LevelScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, w, h);
     this.cameras.main.startFollow(this.player.gameObject, true, 0.1, 0.1);
 
+    WorldOverlay.setCamera(this.cameras.main);
+    this.prompt = makePrompt("E");
+    this.events.once("shutdown", () => {
+      this.promptUnsub?.();
+      this.promptUnsub = null;
+      WorldOverlay.clear();
+    });
+
     this.input.keyboard?.on("keydown-E", () => this.handleInteract());
 
     EventBus.emit(EVENTS.zoneChanged, { zone: project.title });
@@ -135,6 +150,7 @@ export class LevelScene extends Phaser.Scene {
       const dist = Math.abs(this.player.x - cp.x);
       if (dist <= WORLD.interactRadius) {
         this.contentPanel.show({ title: cp.title, body: cp.body });
+        this.aayush.say(firstSentence(cp.body), "Aayush", "Press E to read more");
         if (!cp.opened) {
           cp.opened = true;
           this.advanceGuide();
@@ -157,5 +173,31 @@ export class LevelScene extends Phaser.Scene {
 
   update(): void {
     this.player.update();
+    this.updateCheckpointPrompt();
+  }
+
+  private updateCheckpointPrompt(): void {
+    let nearest: CheckpointMarker | null = null;
+    let nearestDist = Infinity;
+    for (const cp of this.checkpoints) {
+      const dist = Math.abs(this.player.x - cp.x);
+      if (dist <= WORLD.interactRadius && dist < nearestDist) {
+        nearest = cp;
+        nearestDist = dist;
+      }
+    }
+
+    if (nearest) {
+      if (nearest !== this.promptCp) {
+        this.promptUnsub?.();
+        this.promptCp = nearest;
+        this.promptUnsub = WorldOverlay.track(this.prompt, () => ({ x: this.promptCp!.x, y: this.promptCp!.y }), 44);
+      }
+    } else if (this.promptCp) {
+      this.promptUnsub?.();
+      this.promptUnsub = null;
+      this.promptCp = null;
+      this.aayush.clearSay();
+    }
   }
 }
