@@ -1,65 +1,53 @@
-// Sprite swap contract. Every character-rendering piece of code reads from here
-// and NEVER hardcodes an image path. Swapping in real art later = drop files in
-// public/assets/, fill `path`, flip `usePlaceholder` to false. Nothing else changes.
-
+// Sprite swap contract. Character code reads from here; never hardcodes a path.
 export interface AnimDef {
-  /** Animation key, e.g. "idle", "walk". */
   key: string;
-  /** Inclusive frame index range into the sheet. Ignored while usePlaceholder. */
   frames: [start: number, end: number];
-  /** Frames per second. */
   frameRate: number;
-  /** -1 = loop forever. */
-  repeat: number;
+  repeat: number; // -1 = loop
 }
-
 export interface SpriteDef {
-  /** Texture key used by Phaser and by entity code. */
   key: string;
-  /** When true, the entity draws a colored rectangle instead of loading `path`. */
   usePlaceholder: boolean;
-  /** Spritesheet path under public/. Only read when usePlaceholder is false. */
   path: string;
-  /** Source frame size in the sheet. */
   frameWidth: number;
   frameHeight: number;
-  /** On-screen size (rect size in placeholder mode, sprite display size otherwise). */
   displayWidth: number;
   displayHeight: number;
-  /** Fill color for the placeholder rectangle. */
   placeholderColor: number;
-  /** Named animations. In placeholder mode entities may tween the rect instead. */
+  tint?: number; // applied to the real sprite (e.g. to differentiate Aayush)
   anims: AnimDef[];
 }
 
-const WALK_ANIMS: AnimDef[] = [
-  { key: "idle", frames: [0, 0], frameRate: 1, repeat: -1 },
-  { key: "walk", frames: [0, 3], frameRate: 10, repeat: -1 },
+const CHARACTER_ANIMS: AnimDef[] = [
+  { key: "idle", frames: [0, 3], frameRate: 6, repeat: -1 },
+  { key: "run", frames: [4, 11], frameRate: 14, repeat: -1 },
+  { key: "jump", frames: [12, 15], frameRate: 10, repeat: 0 },
+  { key: "fall", frames: [16, 22], frameRate: 10, repeat: 0 },
 ];
 
 export const SPRITES = {
   player: {
     key: "player",
-    usePlaceholder: true,
-    path: "assets/player.png",
-    frameWidth: 32,
-    frameHeight: 48,
-    displayWidth: 32,
-    displayHeight: 48,
-    placeholderColor: 0x00e5ff, // cyan visitor
-    anims: WALK_ANIMS,
+    usePlaceholder: false,
+    path: "assets/character/character_warped_strip.png",
+    frameWidth: 71,
+    frameHeight: 67,
+    displayWidth: 64,
+    displayHeight: 60,
+    placeholderColor: 0x00e5ff,
+    anims: CHARACTER_ANIMS,
   },
-  // Aayush — the findable NPC / guide. "Kura" is his handle.
   aayush: {
     key: "aayush",
-    usePlaceholder: true,
-    path: "assets/aayush.png",
-    frameWidth: 32,
-    frameHeight: 48,
-    displayWidth: 32,
-    displayHeight: 48,
-    placeholderColor: 0xffd166, // warm amber NPC
-    anims: WALK_ANIMS,
+    usePlaceholder: false,
+    path: "assets/character/character_warped_strip.png",
+    frameWidth: 71,
+    frameHeight: 67,
+    displayWidth: 64,
+    displayHeight: 60,
+    placeholderColor: 0xffd166,
+    tint: 0xffcf6a, // warm tint so Aayush reads distinct from the player
+    anims: CHARACTER_ANIMS,
   },
 } satisfies Record<string, SpriteDef>;
 

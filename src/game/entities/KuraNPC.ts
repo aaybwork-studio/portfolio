@@ -1,24 +1,42 @@
-// Aayush — the findable NPC / level guide. Placeholder rectangle from
-// SPRITES.aayush, with a floating name label. Static until talked to; in
-// levels he walks ahead to the next checkpoint via walkTo().
+// Aayush — the findable NPC / level guide. Renders the real animated sprite
+// (tinted) when SPRITES.aayush has usePlaceholder=false; falls back to a
+// colored rectangle otherwise. Floating name label, static until talked to;
+// in levels he walks ahead to the next checkpoint via walkTo().
 
 import Phaser from "phaser";
 import { SPRITES } from "../config/sprites";
 import { WorldOverlay, makeBubble } from "../ui/WorldOverlay";
 
+type NPCGameObject = (Phaser.GameObjects.Rectangle | Phaser.GameObjects.Sprite) & {
+  body: Phaser.Physics.Arcade.Body;
+};
+
 export class KuraNPC {
   readonly scene: Phaser.Scene;
-  readonly gameObject: Phaser.GameObjects.Rectangle & { body: Phaser.Physics.Arcade.Body };
+  readonly gameObject: NPCGameObject;
+  private readonly isPlaceholder: boolean;
   private label: Phaser.GameObjects.Text;
   private bubbleUnsub?: () => void;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.scene = scene;
     const def = SPRITES.aayush;
+    this.isPlaceholder = def.usePlaceholder;
 
-    const rect = scene.add.rectangle(x, y, def.displayWidth, def.displayHeight, def.placeholderColor);
-    scene.physics.add.existing(rect, true); // static body by default
-    this.gameObject = rect as Phaser.GameObjects.Rectangle & { body: Phaser.Physics.Arcade.Body };
+    if (def.usePlaceholder) {
+      const rect = scene.add.rectangle(x, y, def.displayWidth, def.displayHeight, def.placeholderColor);
+      scene.physics.add.existing(rect, true); // static body by default
+      this.gameObject = rect as NPCGameObject;
+    } else {
+      const sprite = scene.add.sprite(x, y, def.key);
+      sprite.setDisplaySize(def.displayWidth, def.displayHeight);
+      if (def.tint !== undefined) {
+        sprite.setTint(def.tint);
+      }
+      scene.physics.add.existing(sprite, true); // static body by default
+      this.gameObject = sprite as NPCGameObject;
+      sprite.anims.play(`${def.key}-idle`, true);
+    }
 
     this.label = scene.add.text(x, y - def.displayHeight, "Aayush", {
       fontFamily: "monospace",
@@ -55,16 +73,29 @@ export class KuraNPC {
 
   /** Tween-walk horizontally to x, calling onArrive when done. */
   walkTo(x: number, onArrive?: () => void): void {
+    const def = SPRITES.aayush;
     const distance = Math.abs(x - this.gameObject.x);
     const speed = 120; // px/sec, guide pace
     const duration = Math.max(200, (distance / speed) * 1000);
+
+    if (!this.isPlaceholder) {
+      const sprite = this.gameObject as Phaser.GameObjects.Sprite;
+      sprite.setFlipX(x < this.gameObject.x);
+      sprite.anims.play(`${def.key}-run`, true);
+    }
 
     this.scene.tweens.add({
       targets: [this.gameObject, this.label],
       x,
       duration,
       ease: "Linear",
-      onComplete: () => onArrive?.(),
+      onComplete: () => {
+        if (!this.isPlaceholder) {
+          const sprite = this.gameObject as Phaser.GameObjects.Sprite;
+          sprite.anims.play(`${def.key}-idle`, true);
+        }
+        onArrive?.();
+      },
     });
   }
 

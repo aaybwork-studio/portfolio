@@ -1,13 +1,19 @@
-// Placeholder-rendered player entity. Draws a colored rectangle sized from
-// SPRITES.player and moves it with arcade physics per WORLD tunables.
+// Player entity. Renders the real animated sprite when SPRITES.player has
+// usePlaceholder=false; falls back to a colored rectangle otherwise. Moves
+// with arcade physics per WORLD tunables in both modes.
 
 import Phaser from "phaser";
 import { WORLD } from "../config/world";
 import { SPRITES } from "../config/sprites";
 
+type PlayerGameObject = (Phaser.GameObjects.Rectangle | Phaser.GameObjects.Sprite) & {
+  body: Phaser.Physics.Arcade.Body;
+};
+
 export class Player {
   readonly scene: Phaser.Scene;
-  readonly gameObject: Phaser.GameObjects.Rectangle & { body: Phaser.Physics.Arcade.Body };
+  readonly gameObject: PlayerGameObject;
+  private readonly isPlaceholder: boolean;
   private cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   private keyA: Phaser.Input.Keyboard.Key;
   private keyD: Phaser.Input.Keyboard.Key;
@@ -19,12 +25,34 @@ export class Player {
   constructor(scene: Phaser.Scene, x: number, y: number) {
     this.scene = scene;
     const def = SPRITES.player;
+    this.isPlaceholder = def.usePlaceholder;
 
-    const rect = scene.add.rectangle(x, y, def.displayWidth, def.displayHeight, def.placeholderColor);
-    scene.physics.add.existing(rect);
-    this.gameObject = rect as Phaser.GameObjects.Rectangle & { body: Phaser.Physics.Arcade.Body };
-    this.gameObject.body.setCollideWorldBounds(false);
-    this.gameObject.body.setSize(def.displayWidth, def.displayHeight);
+    if (def.usePlaceholder) {
+      const rect = scene.add.rectangle(x, y, def.displayWidth, def.displayHeight, def.placeholderColor);
+      scene.physics.add.existing(rect);
+      this.gameObject = rect as PlayerGameObject;
+      this.gameObject.body.setCollideWorldBounds(false);
+      this.gameObject.body.setSize(def.displayWidth, def.displayHeight);
+    } else {
+      const sprite = scene.add.sprite(x, y, def.key);
+      sprite.setDisplaySize(def.displayWidth, def.displayHeight);
+      scene.physics.add.existing(sprite);
+      this.gameObject = sprite as PlayerGameObject;
+      this.gameObject.body.setCollideWorldBounds(false);
+
+      // The character art sits centered in the frame with transparent padding,
+      // so use a tighter body than the full display size, offset to stand on
+      // the feet rather than the frame's vertical center.
+      const bodyWidth = def.displayWidth * 0.35;
+      const bodyHeight = def.displayHeight * 0.7;
+      this.gameObject.body.setSize(bodyWidth, bodyHeight);
+      this.gameObject.body.setOffset(
+        (def.displayWidth - bodyWidth) / 2,
+        def.displayHeight - bodyHeight,
+      );
+
+      sprite.anims.play(`${def.key}-idle`, true);
+    }
 
     const keyboard = scene.input.keyboard;
     if (!keyboard) {
@@ -55,6 +83,7 @@ export class Player {
     const left = this.cursors.left?.isDown || this.keyA.isDown;
     const right = this.cursors.right?.isDown || this.keyD.isDown;
     const jumpPressed = this.cursors.up?.isDown || this.keyW.isDown || this.keySpace.isDown;
+    const moving = left || right;
 
     if (left) {
       body.setVelocityX(-WORLD.moveSpeed);
@@ -75,6 +104,27 @@ export class Player {
     const onFloor = body.blocked.down || body.touching.down;
     if (jumpPressed && onFloor) {
       body.setVelocityY(-WORLD.jumpVelocity);
+    }
+
+    if (!this.isPlaceholder) {
+      const sprite = this.gameObject as Phaser.GameObjects.Sprite;
+      const def = SPRITES.player;
+
+      if (left) {
+        sprite.setFlipX(true);
+      } else if (right) {
+        sprite.setFlipX(false);
+      }
+
+      let animKey: string;
+      if (!onFloor) {
+        animKey = body.velocity.y < 0 ? `${def.key}-jump` : `${def.key}-fall`;
+      } else if (moving) {
+        animKey = `${def.key}-run`;
+      } else {
+        animKey = `${def.key}-idle`;
+      }
+      sprite.anims.play(animKey, true);
     }
   }
 }

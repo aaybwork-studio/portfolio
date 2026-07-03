@@ -12,8 +12,8 @@ Turn the working placeholder-shape skeleton into an immersive, art-driven, Hollo
 
 - **Art is now IN.** Placeholder rectangles replaced with real art via the existing `sprites.ts` / `biomes.ts` config seam (`usePlaceholder` → false, fill `path`, drop files in `public/assets/`). No game logic references image paths directly.
 - **Character sprites** (player + Aayush): free **CC0 animated sprite** (walk / idle / jump frames). Aayush = recolor/variant of the same or a second CC0 sprite.
-- **Environments / parallax / props / themed portals**: **Gemini-generated** (`nano-banana-pro` skill), one cohesive art direction.
-- **Art direction**: moody painterly, Hollow-Knight-ish — desaturated depth, silhouette foregrounds, glowing accents, per-biome palette. Palettes already defined in `biomes.ts` drive accent/lighting.
+- **Environments / parallax / props / tiles**: **CC0 free packs** (Kenney / OpenGameArt), one cohesive art system tinted per biome. (Gemini image-gen ruled out — free-tier quota is 0; billing declined.)
+- **Art direction**: the *experience* of a crafted immersive platformer (like Hollow Knight) — NOT its grim visual vibe. Portfolio-appropriate: clean, cohesive, atmospheric, approachable. One cohesive CC0 art system **tinted per biome** to hit each theme's palette (from `biomes.ts`) + themed accent props, rather than 6 bespoke background sets.
 - **Inventory persistence**: `localStorage` allowed (relaxes brief's "no browser storage"; still no backend/DB). Gifts + resume-collected persist across visits.
 - **Motion**: atmospheric/weighty, tasteful — not arcade-gaudy. Respect `prefers-reduced-motion` (disable non-essential motion, keep functional transitions instant).
 - **No fail states** anywhere (unchanged). Platforming is for exploration/mood; nothing kills the player.
