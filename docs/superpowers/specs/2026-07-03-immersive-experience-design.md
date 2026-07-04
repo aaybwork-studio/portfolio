@@ -117,3 +117,29 @@ Supersedes the "pixel-art indie / Warped City" art direction. The Warped City (A
 ### Guide flow in levels (refined)
 - Aayush **leads**: walks to the next checkpoint and **waits** there. Player walks over and **interacts** (E → panel). On panel close, Aayush advances to the **next** checkpoint; player follows. He **shows the way** around the map (a light trail/arrow toward his target is welcome).
 - Levels are **non-linear** — varied platform elevations, small exploration, checkpoints not on a straight line. Still **fun + simple**, **no fail states** (nothing kills the player).
+
+---
+
+## 2026-07-04 Revision 2 — vehicle-piloted levels
+
+Supersedes on-foot platforming in levels (platform layouts/reachability retired). The knight now only walks in the **Hub**; each **level** is piloted in a themed vehicle.
+
+### Level mechanic: free-pilot vehicle
+- In a level the player controls a **themed vehicle in free 2D movement** (arrows/WASD move in all directions, **no gravity**) across a level space larger than the screen. Reach **floating checkpoints** to open their panels.
+- Level design: **simple + retro aesthetic** with **hidden secret areas** off the main path (optional secret checkpoint/collectible). No obstacle gauntlets, **no fail states**.
+- Aayush **leads**: flies/moves ahead to the next checkpoint and waits (guide arrow points to him). 2D-distance interaction (must reach the checkpoint).
+- Per-level vehicle: **Orbit = rocket**, **Memory Bank = boat/ferry**, **Nav-Aid = self-driving pod**, **PitWall = F1 car**. (Uniform free-2D-move mechanic; the sprite sells the theme.)
+
+### Hub: vehicles, not doors
+- The 4 portals become **parked themed vehicles** (rocket, boat, pod, F1 car). Walk up as the knight, press **E** to **board** → a short **launch animation** (rocket lifts off / F1 speeds off / boat sails / pod drives out of frame) → transition into that level (now piloting the vehicle).
+- Leaving a level returns to the Hub.
+
+### Landing page: clean + simple
+- Big **PLAY** button + one **low-opacity line** "Press Enter to enter the game." Remove the floating-element clutter and the HUD overlap on the title. Keep it minimal.
+
+### Speech bug
+- Each level must show **only its own project's** checkpoint text. Clear WorldOverlay bubbles / guide state on scene shutdown so no stale/cross-project speech leaks between levels.
+
+### Art needed
+- Vehicle sprites (rocket, boat, pod, F1 car). Backgrounds for **all** biomes (hub + 4 levels + landing), NES 8-bit CC0, **tinted per biome** to theme colors. Hub art. Landing art (minimal).
+
