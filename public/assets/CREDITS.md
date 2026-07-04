@@ -1,167 +1,156 @@
 # Asset Credits / Licensing Record
 
-The previous Kenney "New Platformer Pack" assets (flat-vector style) were
-**rejected** as too low a quality bar for a portfolio site and have been
-**fully removed**. They are replaced with **Warped City** by **Luis Zuno
-(ansimuz)** — a cyberpunk/neon pixel-art platformer asset pack, licensed
-**CC0** (public domain), sourced via its OpenGameArt.org mirror.
+## Art direction change (2026-07-04)
 
-The dark, twilight-tech, orange/red-horizon-glow aesthetic of this pack is a
-strong direct match for the site's `orbit` biome palette
-(`bg: 0x0b0806`, `accent: 0xff4500` — see `src/game/config/biomes.ts`).
+The previous **Warped City** cyberpunk pixel-art set (by Luis Zuno / ansimuz,
+CC0) has been **retired and fully deleted**. Art direction changed to
+**strict NES 8-bit retro** (Mario / Super Mario Bros.-era look: tiny limited
+palette, chunky low-res pixels, ~16px character grid). Warped City's 71x67
+detailed sprites and 4-layer neon cyberpunk parallax no longer matched the
+target aesthetic, which calls for authentic 8-bit-console pixel density —
+not "pixel art" in the looser, more detailed 16-bit sense.
 
-## Search process / alternatives considered
+All Warped City files (`character_warped_strip.png`, `warped_city_tileset.png`,
+`layer0_sky_far.png`, `layer1_sky_moon.png`, `layer2_skyline_mid.png`,
+`layer3_buildings_near.png`) and their previews have been deleted from
+`public/assets/`. `src/game/config/sprites.ts` and
+`src/game/config/biomes.ts` have been updated to point at the new files
+below (frame sizes, animation frame ranges, and the ground-tile index were
+all re-derived for the new assets — see those files' inline comments).
 
-Before settling on Warped City, the following packs were also downloaded and
-inspected pixel-for-pixel (not just skimmed):
+Three separate CC0 OpenGameArt.org packs were used, chosen individually per
+deliverable since no single strict-NES pack covered character + tiles +
+background at the same quality bar. All three share the same design
+philosophy (16px-grid, limited palette, hard pixel edges, no anti-aliasing)
+so they read as cohesive despite being multi-source.
 
-- **Pixel Frog — "Kings and Pigs"** (https://pixelfrog-assets.itch.io/kings-and-pigs,
-  CC0 per the artist's own itch.io page). Genuinely excellent, painterly
-  78×58 character (11-frame idle, 8-frame run, 3-frame attack) — arguably
-  more charming per-frame than Warped City. **Rejected for this deliverable**
-  because the pack ships **no background/parallax layers at all** (only a
-  stone-castle interior tileset), so pairing it would mean mixing a
-  different artist's backgrounds in and breaking visual cohesion. Kept as a
-  strong candidate if a "King" or med-fantasy biome character is wanted
-  later — it is fully CC0 and already verified.
-- **Ansimuz — "Sunny Land"** (https://ansimuz.itch.io/sunny-land-pixel-game-art,
-  public-domain per the pack's own `public-license.txt`). Good 33×32
-  character (4-frame idle, 6-frame run, 2-frame jump) and usable `back.png`
-  / `middle.png` background layers, but only 2 real depth layers (not 4+),
-  and jump/run frame counts are noticeably thinner than Warped City's.
-  Rejected in favor of Warped City's richer animation set and true 4-layer
-  parallax.
-- **"Parallax Backgrounds" by Admurin** (OpenGameArt, CC-BY 4.0, 9 hand-painted
-  layers per biome incl. Plains/Caves/SnowyMountains/DeadForest/Dock).
-  Beautiful, but a painterly hand-drawn style, not pixel-art — stylistically
-  incompatible with a crisp pixel-art character. Rejected on style-cohesion
-  grounds, not license.
-- Surveyed itch.io's free/CC0/pixel-art/parallax tag listings and several
-  named packs (Ninja Adventure, Ansimuz's other Warped/Gothicvania/Quiet
-  Hill lines, Foozle, Ansimuz's dedicated Parallax Forest/Mountain Dusk
-  packs) via search; none combined (a) a richer animation set, (b) true
-  multi-layer parallax, and (c) a matching tileset from one single cohesive
-  CC0/CC-BY source better than Warped City.
+## Search process / license verification
 
-Warped City won because it is the only pack that delivers all three
-deliverables — character, backgrounds, tileset — from one artist, one
-palette, one pixel density, at CC0, with the richest animation set found (45
-usable frames across 6 named states).
+Searched OpenGameArt.org and itch.io for "NES", "8-bit", "CC0 platformer",
+"NES tileset", "NES character sprite". Rejected candidates:
 
-## Source Pack (chosen)
+- `opengameart.org/content/an-8-bit-beat-em-up-character-sprite-sheet`
+  ("An 8-bit beat-em-up character sprite sheet", author devurandom, CC0
+  confirmed) — only a single 240x240 animated GIF (karate/punch loop), not a
+  sliced idle/walk/jump frame set suitable for this engine's spritesheet
+  contract. Rejected for practicality, not license.
+- `opengameart.org/content/sky-clouds` ("Sky Clouds" by ExileGL, CC0
+  confirmed on page) — downloaded and inspected (`sky.png`, 2284x1224). It's
+  a soft-gradient/blurred glow image, not authentic hard-edged NES pixel
+  art. Rejected on style grounds.
+- itch.io's `tag-8-bit`/`tag-nes` free listing was surveyed but OpenGameArt
+  yielded better-verified, explicitly-licensed matches faster.
 
-- **Pack name:** Warped City — Cyberpunk Pixel Art Platformer Assets
-- **Author:** Luis Zuno (`ansimuz`)
-- **Canonical pages:**
-  - https://ansimuz.itch.io/warped-city (itch.io original listing)
-  - https://opengameart.org/content/warped-city (OpenGameArt mirror — used for download)
-- **Direct download used:** https://opengameart.org/sites/default/files/warped_city_files.zip
-- **License:** **CC0 1.0 Universal (Public Domain)** — https://creativecommons.org/publicdomain/zero/1.0/
-- **Confirmed CC0:** Yes — OpenGameArt.org's submission page for "Warped City"
-  lists the license as CC0 with author `ansimuz` (the pack's history shows
-  it was CC-BY before the author explicitly relicensed it to CC0).
-  Attribution is not legally required; it's provided here anyway as good
-  practice, and the game's footer credits the artist.
-
-This single pack was used for all three deliverables (character, tiles,
-backgrounds) so the art stays visually cohesive — same artist, same palette,
-same pixel density, all extracted from the pack's own `SPRITES/`,
-`ENVIRONMENT/` and `demo/assets/` folders (the pack ships a full working
-Phaser demo, so these are exactly the files a shipped game would use).
+Each pack used below was fetched directly and its license field on the page
+was parsed/quoted before download — all three show `License(s): CC0` in the
+page's own license-taxonomy field.
 
 ## 1. Character — `public/assets/character/`
 
+- **Pack name:** "RPG Character 'Knight' (NES)"
+- **Author:** Chasersgaming
+- **Source URL:** https://opengameart.org/content/rpg-character-knight-nes
+- **License:** **CC0** — page's License(s) field reads exactly `CC0`.
+- **Files used:** downloaded `NES Knight Free Version.zip` (linked from the
+  same page) for its pre-sliced per-direction animation strips:
+  - `Idle PNG/NES PNG Knight_Idle_EAST_strip4.png` (64x24, 4 frames)
+  - `Run PNG/NES PNG Knight_Run_EAST_strip4.png` (64x24, 4 frames)
+  - `Jump PNG/NES PNG Knight_Jump_EAST.png` (16x24, 1 frame)
+  - `Hit PNG/NES PNG Knight_Hit_EAST.png` (16x24, 1 frame, reused as the
+    "fall" pose — the pack has no separate airborne-descent frame)
+
+  These were cropped to individual 16x24 frames and concatenated
+  left-to-right into one strip with a Python/PIL script (simple horizontal
+  paste, no resizing/repadding — source frames were already uniform).
+
 | File | Description |
 |---|---|
-| `character_warped_strip.png` | Custom-composited horizontal strip built by concatenating the pack's own individual per-frame PNGs (already uniform-canvas, no repadding needed) left-to-right in animation order. Same CC0 source frames, just laid out contiguously for easy engine slicing. |
+| `character_nes_knight_strip.png` | Composited horizontal strip, EAST-facing knight, 16x24 px per frame, 160x24 px total (10 frames). |
 
-**Frame data:** every frame is **71 × 67 px**. Sheet is **3195 × 67 px** (45
-frames total, 71px pitch, single row).
+**Frame data:** frame size **16 x 24 px**. Sheet is **160 x 24 px** (10
+frames, 16px pitch, single row).
 
-| Frame range | Anim | Frame count | Source files |
+| Frame range | Anim | Frame count | Source |
 |---|---|---|---|
-| 0–3 | `idle` | 4 | `SPRITES/player/idle/idle-1..4.png` |
-| 4–11 | `run` | 8 | `SPRITES/player/run/run-1..8.png` |
-| 12–15 | `jump` (rise) | 4 | `SPRITES/player/jump/jump-1..4.png` |
-| 16–22 | `fall` | 7 | `SPRITES/player/back-jump/back-jump-1..7.png` (pack's airborne/descending pose set — used as the fall animation) |
-| 23–38 | `walk` (bonus, slower-paced alt to run) | 16 | `SPRITES/player/walk/walk-1..16.png` |
-| 39–44 | `climb` (bonus, ladder/wall-climb) | 6 | `SPRITES/player/climb/climb-1..6.png` |
+| 0–3 | `idle` | 4 | `Idle PNG/.../Knight_Idle_EAST_strip4.png` |
+| 4–7 | `run` | 4 | `Run PNG/.../Knight_Run_EAST_strip4.png` |
+| 8 | `jump` | 1 | `Jump PNG/.../Knight_Jump_EAST.png` |
+| 9 | `fall` | 1 | `Hit PNG/.../Knight_Hit_EAST.png` (reused pose) |
 
-Determined by: (1) each source subfolder's own file naming/numbering
-(`idle-1.png`...`idle-4.png` etc — unambiguous), and (2) `sips -g pixelWidth
--g pixelHeight` confirming every one of the 45 source PNGs is exactly 71×67
-with no cropping/trim variance, so a fixed-pitch strip could be built with a
-simple horizontal paste (verified with a Python/PIL script, no visual
-distortion). This is a **richly animated** character: 4-frame idle breathing
-loop, 8-frame run cycle, separate rise/fall airborne poses, plus bonus
-16-frame walk and 6-frame climb cycles not requested but available for later
-use (e.g. ladder sections).
+`src/game/config/sprites.ts` was updated: `frameWidth: 16`, `frameHeight: 24`,
+`path: "assets/character/character_nes_knight_strip.png"`, and
+`CHARACTER_ANIMS` frame ranges updated to match the table above.
 
-Other poses available in the source pack but not included in the strip
-(extractable the same way later): `crouch` (1 frame), `hurt` (1 frame),
-`shoot` / `run-shoot` (9 frames, ranged-attack pose) — useful for a
-damage/interact state later.
+Preview: `public/assets/_previews/character_sheet_preview_4x.png` (4x
+nearest-neighbor upscale).
 
-Preview: `public/assets/_previews/character_strip_preview_3x.png` (3x
-nearest-neighbor upscale of the full strip for easy visual review).
+## 2. Tiles — `public/assets/tiles/`
 
-## 2. Backgrounds — `public/assets/backgrounds/`
-
-Four parallax layers, back-to-front, all extracted from the pack's own
-`ENVIRONMENT/background/` source-layer folder (the pre-composited layers used
-by the pack's shipped Phaser demo, not a flattened preview image):
-
-| Layer | File | Dimensions | Depth order | Tiles horizontally? |
-|---|---|---|---|---|
-| 0 (farthest) | `layer0_sky_far.png` | 128 × 240 | Sky — stars + horizon glow, no moon | Yes — seamless repeat, ~88% edge-pixel match measured |
-| 1 (far) | `layer1_sky_moon.png` | 128 × 240 | Sky variant with visible moon + stars | Yes — seamless repeat, ~88% edge-pixel match measured |
-| 2 (mid) | `layer2_skyline_mid.png` | 144 × 124 | Silhouette skyline band (buildings, antennas) | Mostly — ~77% edge-pixel match; designed as a repeating band, minor seam visible at default alignment |
-| 3 (near) | `layer3_buildings_near.png` | 493 × 209 | Foreground neon/detailed building cutouts (individual buildings on transparent background) | No — this is a **prop scatter strip**, not a seamless tile; place/repeat as a group or hand-arrange, standard usage for this kind of foreground decoration layer |
-
-Recommended `scrollFactor` mapping onto `biomes.ts`'s 3-slot `layers()`
-helper: use layer 0 or 1 as `sky` (scrollFactor 0.0), layer 2 as `mid`
-(scrollFactor ~0.35), layer 3 as an additional near-foreground layer
-(scrollFactor ~0.6–0.8, in front of mid, behind gameplay) if a 4th slot is
-added to the parallax contract; otherwise layer 3 can be omitted for biomes
-that only support 3 slots.
-
-Preview: `public/assets/_previews/background_layers_composite_preview.png` —
-a 640×360 assembled composite (sky tiled + mid skyline tiled + near
-buildings placed once at bottom-left) showing how the 4 layers read
-together. Confirms strong atmospheric depth and a palette that closely
-matches the `orbit` biome's near-black background / orange-red horizon
-accent already defined in `src/game/config/biomes.ts`.
-
-## 3. Tiles — `public/assets/tiles/`
+- **Pack name:** "Simple NES-like Platformer Tiles"
+- **Author:** surt
+- **Source URL:** https://opengameart.org/content/simple-nes-like-platformer-tiles
+- **License:** **CC0** — page's License(s) field reads exactly `CC0`.
+- **Direct download used:** https://opengameart.org/sites/default/files/nestle.png
+  (shipped at 2048x2048, a clean nearest-neighbor 4x upscale of a native
+  16px-tile-grid sheet — confirmed by sampling 4x4 pixel blocks, 93.75% were
+  perfectly uniform, consistent with a lossless 4x export). Downscaled back
+  to native resolution with `Image.resize(..., Image.NEAREST)` to get an
+  authentic 512x512, 16px-tile sheet (no quality loss, since the 4x version
+  had no anti-aliasing to lose).
 
 | File | Description |
 |---|---|
-| `warped_city_tileset.png` | Full tileset atlas, copied unmodified from `ENVIRONMENT/tileset.png` in the source pack. |
+| `nes_platformer_tileset.png` | Full tileset, downscaled to native 16x16-tile resolution, 512x512 px (32 columns x 32 rows). |
 
-- **Tile size: 16 × 16 px.** Confirmed directly from the pack's own shipped
-  Tiled map (`demo/assets/maps/map.json`): `"tilewidth": 16, "tileheight":
-  16`, and the tileset declaration `"columns": 24, "imagewidth": 384,
-  "imageheight": 256, "tilecount": 384` — i.e. this exact 384×256 PNG on a
-  24-column, 16-row grid of 16×16 tiles.
-- **Ground tile identified:** by parsing `map.json`'s `"Main Layer"` tile
-  data and counting tile-gid frequency, gid **272** is by far the most-used
-  non-empty tile (249 placements across the demo map). With `firstgid: 1`
-  and 24 columns, gid 272 → 0-based index 271 → column 7, row 11 → pixel
-  offset (112, 176) in the sheet. Cropped and visually confirmed: it is a
-  cyan-topped dark platform/floor block, i.e. the ground tile.
-- Other high-frequency tiles found in the same map (walls/panels/edges, not
-  further identified individually): gids 29, 56, 46, 245, 50, 26.
+- **Tile size: 16 x 16 px.**
+- **Ground tile identified:** column 21, row 5 (0-based) — a fully opaque
+  brown/cream checkered dirt block matching the pack's own mockup image
+  (`nestle_mockup.png`, viewed for visual confirmation: same tile appears as
+  the solid-ground fill under floating platforms and the main ground strip).
+  Phaser spritesheet frame index (32 columns/row, row-major) =
+  `5 * 32 + 21 = 181`.
 
-Preview: `public/assets/_previews/tileset_preview_2x.png` (2x
-nearest-neighbor upscale of the full atlas).
+`src/game/config/biomes.ts`'s `orbit.groundTileset` was updated to
+`{ path: "assets/tiles/nes_platformer_tileset.png", tileSize: 16, groundIndex: 181 }`.
+
+Preview: `public/assets/_previews/tileset_preview_2x.png` (2x nearest-neighbor
+upscale of the full 512x512 atlas).
+
+## 3. Backgrounds — `public/assets/backgrounds/`
+
+- **Pack name:** "Generic Platformer Tileset (16x16) + Background"
+- **Author:** etqws3
+- **Source URL:** https://opengameart.org/content/generic-platformer-tileset-16x16-background
+- **License:** **CC0** — page's License(s) field reads exactly `CC0`.
+- **Files used** (DB32-palette, flat/limited-color, hard-pixel-edge — no
+  anti-aliasing, consistent with strict NES look):
+  - `2015-02-26 [DB32](Generic Platformer)(Clouds).png` → `nes_sky_clouds.png`
+  - `2015-02-26 [DB32](Generic Platformer)(Mountains).png` → `nes_mountains_mid.png`
+
+| Layer | File | Dimensions | Tiles horizontally? | Palette / tintability |
+|---|---|---|---|---|
+| Sky (far) | `nes_sky_clouds.png` | 256 x 144 | Yes — measured 100% left/right column pixel match | Flat single cyan-blue fill + white pixel clouds only (2-3 colors total). Very tintable: recoloring the base cyan via CSS/canvas hue-shift or multiply-tint cleanly maps to any biome accent without touching the white cloud highlights. |
+| Mountains (mid) | `nes_mountains_mid.png` | 256 x 144 | Mostly — measured ~96.4% left/right column pixel match (minor seam, same as source pack's own tileable design) | Grey/purple silhouette mountains over a near-black base — already low-saturation and neutral, tints well as a multiply/overlay layer without a strong competing hue. |
+
+Both were verified by tiling 2x horizontally in a throwaway test image and
+visually confirming the repeat reads cleanly (sky: seamless; mountains:
+negligible seam matching the pack's own intended tiling behavior).
+
+Currently wired into `orbit` biome's `layers` (sky at `scrollFactor: 0.0`,
+mountains at `scrollFactor: 0.35`) in `src/game/config/biomes.ts`. Other
+biomes (`hero`, `hub`, `memory-bank`, `nav-aid`, `pitwall`) remain in
+placeholder (solid-color) mode per the existing biome-swap contract — these
+two layers are neutral/flat enough to reuse for other biomes later by
+re-tinting, without needing new art.
 
 ## Previews — `public/assets/_previews/`
 
 | File | Shows |
 |---|---|
-| `character_strip_preview_3x.png` | Full 45-frame character strip, 3x scaled, for at-a-glance animation review |
-| `background_layers_composite_preview.png` | All 4 background layers assembled into one 640×360 scene |
-| `tileset_preview_2x.png` | Full 384×256 tileset atlas, 2x scaled |
+| `character_sheet_preview_4x.png` | Full 10-frame character strip, 4x scaled |
+| `tileset_preview_2x.png` | Full 512x512 tileset atlas, 2x scaled |
+| `background_sky_preview_3x.png` | Sky/clouds layer, 3x scaled |
+| `background_mountains_preview_3x.png` | Mountains mid layer, 3x scaled |
 
 These preview files are for human/reviewer inspection only and are not
 required at runtime — safe to delete if disk space matters, the engine

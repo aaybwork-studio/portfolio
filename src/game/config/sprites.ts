@@ -20,31 +20,31 @@ export interface SpriteDef {
 
 const CHARACTER_ANIMS: AnimDef[] = [
   { key: "idle", frames: [0, 3], frameRate: 6, repeat: -1 },
-  { key: "run", frames: [4, 11], frameRate: 14, repeat: -1 },
-  { key: "jump", frames: [12, 15], frameRate: 10, repeat: 0 },
-  { key: "fall", frames: [16, 22], frameRate: 10, repeat: 0 },
+  { key: "run", frames: [4, 7], frameRate: 12, repeat: -1 },
+  { key: "jump", frames: [8, 8], frameRate: 1, repeat: 0 },
+  { key: "fall", frames: [9, 9], frameRate: 1, repeat: 0 },
 ];
 
 export const SPRITES = {
   player: {
     key: "player",
     usePlaceholder: false,
-    path: "assets/character/character_warped_strip.png",
-    frameWidth: 71,
-    frameHeight: 67,
-    displayWidth: 64,
-    displayHeight: 60,
+    path: "assets/character/character_nes_knight_strip.png",
+    frameWidth: 16,
+    frameHeight: 24,
+    displayWidth: 32,
+    displayHeight: 48,
     placeholderColor: 0x00e5ff,
     anims: CHARACTER_ANIMS,
   },
   aayush: {
     key: "aayush",
     usePlaceholder: false,
-    path: "assets/character/character_warped_strip.png",
-    frameWidth: 71,
-    frameHeight: 67,
-    displayWidth: 64,
-    displayHeight: 60,
+    path: "assets/character/character_nes_knight_strip.png",
+    frameWidth: 16,
+    frameHeight: 24,
+    displayWidth: 32,
+    displayHeight: 48,
     placeholderColor: 0xffd166,
     tint: 0xffcf6a, // warm tint so Aayush reads distinct from the player
     anims: CHARACTER_ANIMS,

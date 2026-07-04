@@ -57,35 +57,25 @@ export const BIOMES = {
     palette: { bg: 0x0b0806, ink: 0xf5efe9, accent: 0xff4500, ground: 0x1a120c },
     layers: [
       {
-        id: "layer0_sky_far",
+        id: "nes_sky_clouds",
         scrollFactor: 0.0,
         color: 0x0b0806,
-        path: "assets/backgrounds/layer0_sky_far.png",
+        path: "assets/backgrounds/nes_sky_clouds.png",
         usePlaceholder: false,
       },
       {
-        id: "layer1_sky_moon",
-        scrollFactor: 0.15,
-        color: 0x0b0806,
-        path: "assets/backgrounds/layer1_sky_moon.png",
-        usePlaceholder: false,
-      },
-      {
-        id: "layer2_skyline_mid",
-        scrollFactor: 0.45,
+        id: "nes_mountains_mid",
+        scrollFactor: 0.35,
         color: 0x160f0a,
-        path: "assets/backgrounds/layer2_skyline_mid.png",
-        usePlaceholder: false,
-      },
-      {
-        id: "layer3_buildings_near",
-        scrollFactor: 0.75,
-        color: 0x1a120c,
-        path: "assets/backgrounds/layer3_buildings_near.png",
+        path: "assets/backgrounds/nes_mountains_mid.png",
         usePlaceholder: false,
       },
     ],
-    groundTileset: { path: "assets/tiles/warped_city_tileset.png", tileSize: 16, groundIndex: 272 },
+    groundTileset: {
+      path: "assets/tiles/nes_platformer_tileset.png",
+      tileSize: 16,
+      groundIndex: 5 * 32 + 21, // row 5, col 21 in the 32-col/16px-tile grid → verified solid checkered ground tile
+    },
   },
   // warm dusk, soft blue accent, place-based
   "memory-bank": {

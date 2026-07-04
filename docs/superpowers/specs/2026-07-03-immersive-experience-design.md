@@ -94,3 +94,26 @@ Crisp key-prompt chips replacing the current faded control-hint. Active-zone hig
 6. Level redesign (non-linear layout configs).
 7. `Inventory` + `InventoryPanel` + gifts + HUD refresh + localStorage.
 8. Read-page redesign + micro-interactions + SEO re-verify.
+
+---
+
+## 2026-07-04 Revision — 8-bit retro pivot
+
+Supersedes the "pixel-art indie / Warped City" art direction. The Warped City (Ansimuz) assets are **retired**.
+
+### Art direction (new)
+- **Strict NES 8-bit** — tiny limited palette, chunky 8×16px tiles, Mario/SMB-era sprites. CC0 NES-style packs.
+- **Retro everywhere** — the game AND the read pages (`/work/*`, `/resume`) get the 8-bit treatment (pixel display font, retro UI chrome). Constraint: keep case-study **body copy legible** (readable body size/contrast) and SEO copy server-rendered — retro styling must not harm readability or crawlability.
+- Re-source: character (Mario-like CC0), tiles, and per-biome backgrounds in NES style. Config seam unchanged (drop files, flip paths).
+
+### World flow (new)
+- **TitleScene (start screen)** is the landing. Big hero text (name / role / tagline) + retro background art + **floating per-project 8-bit icons**. A **PLAY** control. On Play → spawn directly in **HubScene**. The old walkable Hero zone is **removed** (Title replaces it).
+- **Floating title icons** (8-bit): Orbit = space stuff (planets/stars/rocket/satellite, not just an orb); Memory Bank = locket / place-pin; Nav-Aid = navigation waypoint/compass + route-path (NOT a wheelchair); PitWall = F1 tires + cars.
+
+### Back-navigation (new, concrete)
+- **Level**: walking to the **left edge** returns to Hub (mirrors the right-edge exit portal) — you can always back out by walking left.
+- **Hub**: walking to the far **left edge** returns to the **Title** screen.
+
+### Guide flow in levels (refined)
+- Aayush **leads**: walks to the next checkpoint and **waits** there. Player walks over and **interacts** (E → panel). On panel close, Aayush advances to the **next** checkpoint; player follows. He **shows the way** around the map (a light trail/arrow toward his target is welcome).
+- Levels are **non-linear** — varied platform elevations, small exploration, checkpoints not on a straight line. Still **fun + simple**, **no fail states** (nothing kills the player).
