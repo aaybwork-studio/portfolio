@@ -7,6 +7,7 @@
 import Phaser from "phaser";
 import { WORLD, SCENES, EVENTS } from "../config/world";
 import { BIOMES } from "../config/biomes";
+import type { BiomeDef } from "../config/biomes";
 import { Vehicle } from "../entities/Vehicle";
 import { KuraNPC } from "../entities/KuraNPC";
 import { ContentPanel } from "../ui/ContentPanel";
@@ -103,6 +104,7 @@ export class LevelScene extends Phaser.Scene {
 
     this.cameras.main.setBackgroundColor(biome.palette.bg);
     this.bg = createBackground(this, project.biome, { sceneWidth: w });
+    this.createGroundStrip(biome, w, h);
 
     this.contentPanel = new ContentPanel(document.body);
 
@@ -258,6 +260,26 @@ export class LevelScene extends Phaser.Scene {
   private updateGuideArrowTarget(targetX: number, targetY: number): void {
     this.guideArrowUnsub?.();
     this.guideArrowUnsub = WorldOverlay.track(this.guideArrow, () => ({ x: targetX, y: targetY }), 60);
+  }
+
+  /** Decorative tiled ground strip along the bottom of the level, sourced
+   * from the biome's groundTileset (same NES tileset frame as the rest of
+   * the biomes). Purely visual — LevelScene is a no-gravity, no-collision
+   * free-pilot space, so this never affects movement. Tinted with the
+   * biome's mountain/ground tone so the street matches the theme. */
+  private createGroundStrip(biome: BiomeDef, w: number, h: number): void {
+    if (!biome.groundTileset) return;
+    if (!this.textures.exists("warped-tiles")) return;
+
+    const tileSize = biome.groundTileset.tileSize;
+    const stripHeight = tileSize * 2;
+    const strip = this.add.tileSprite(0, h - stripHeight, w, stripHeight, "warped-tiles", biome.groundTileset.groundIndex);
+    strip.setOrigin(0, 0);
+    strip.setScrollFactor(1);
+    strip.setDepth(-999);
+
+    const mtnTint = biome.layers.find((l) => l.id === "nes_mtn")?.tint;
+    if (mtnTint !== undefined) strip.setTint(mtnTint);
   }
 
   update(): void {

@@ -107,6 +107,7 @@ function createRealLayer(
   sprite.setScrollFactor(0);
   sprite.setDepth(BG_DEPTH);
   sprite.setTileScale(tileScale, tileScale);
+  if (layer.tint !== undefined) sprite.setTint(layer.tint);
 
   return { sprite, scrollFactor: layer.scrollFactor };
 }
