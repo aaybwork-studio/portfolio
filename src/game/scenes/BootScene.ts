@@ -58,6 +58,6 @@ export class BootScene extends Phaser.Scene {
       }
     }
 
-    this.scene.start(SCENES.hero);
+    this.scene.start(SCENES.title);
   }
 }

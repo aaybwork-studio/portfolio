@@ -26,6 +26,7 @@ export const WORLD = {
 /** Scene registry keys — the string ids passed to scene.start(). */
 export const SCENES = {
   boot: "BootScene",
+  title: "TitleScene",
   hero: "HeroScene",
   hub: "HubScene",
   level: "LevelScene",

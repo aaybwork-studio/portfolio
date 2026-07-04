@@ -6,7 +6,7 @@ import { EVENTS } from "../config/world";
 import type { NavTarget } from "../config/world";
 
 const NAV_BUTTONS: { label: string; target: NavTarget }[] = [
-  { label: "Hero", target: "hero" },
+  { label: "Title", target: "hero" },
   { label: "Hub", target: "hub" },
   { label: "Orbit", target: "orbit" },
   { label: "Memory Bank", target: "memory-bank" },

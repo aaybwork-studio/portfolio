@@ -41,6 +41,9 @@ export class HubScene extends Phaser.Scene {
   private promptUnsub: (() => void) | null = null;
   private promptTarget: { x: number; y: number } | null = null;
   private bg!: Background;
+  /** Guards against an instant bounce back to Title on arrival — only armed
+   * once the player has moved away from the left edge at least once. */
+  private leftReturnArmed = false;
 
   constructor() {
     super(SCENES.hub);
@@ -68,9 +71,11 @@ export class HubScene extends Phaser.Scene {
     const groundY = h - WORLD.groundHeight;
     this.aayush = new KuraNPC(this, w * 0.22, groundY - 24);
 
-    // Player spawn.
-    this.player = new Player(this, 60, groundY - 40);
+    // Player spawn — offset well past the left-edge-return threshold so
+    // arriving from Title doesn't immediately trigger the return trip.
+    this.player = new Player(this, 120, groundY - 40);
     this.physics.add.collider(this.player.gameObject, ground);
+    this.leftReturnArmed = false;
 
     // Portals: three project levels + pitwall, spaced across remaining hub width.
     const portalDefs: { target: NavTarget; label: string }[] = [
@@ -153,6 +158,24 @@ export class HubScene extends Phaser.Scene {
     this.player.update();
     this.bg.update(this.cameras.main);
     this.updateInteractPrompt();
+    this.updateLeftEdgeReturn();
+  }
+
+  private updateLeftEdgeReturn(): void {
+    const LEFT_EDGE_THRESHOLD = 40;
+
+    // Arm the return only once the player has moved right, clear of the
+    // threshold — prevents an instant bounce back to Title on arrival.
+    if (!this.leftReturnArmed && this.player.x >= LEFT_EDGE_THRESHOLD + 20) {
+      this.leftReturnArmed = true;
+    }
+
+    if (this.leftReturnArmed && this.player.x < LEFT_EDGE_THRESHOLD) {
+      const body = this.player.gameObject.body;
+      if (body.velocity.x < 0) {
+        this.scene.start(SCENES.title);
+      }
+    }
   }
 
   private updateInteractPrompt(): void {

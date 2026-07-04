@@ -10,7 +10,7 @@ import { HUD } from "./ui/HUD";
 import { ContentPanel } from "./ui/ContentPanel";
 import { WorldOverlay } from "./ui/WorldOverlay";
 import { BootScene } from "./scenes/BootScene";
-import { HeroScene } from "./scenes/HeroScene";
+import { TitleScene } from "./scenes/TitleScene";
 import { HubScene } from "./scenes/HubScene";
 import { LevelScene } from "./scenes/LevelScene";
 import { pitwallProject } from "../content";
@@ -47,7 +47,7 @@ export function mountGame(parentId = "game-root"): Phaser.Game | undefined {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-    scene: [BootScene, HeroScene, HubScene, LevelScene],
+    scene: [BootScene, TitleScene, HubScene, LevelScene],
   });
 
   if (import.meta.env.DEV) (window as unknown as { __game?: Phaser.Game }).__game = game;
@@ -65,24 +65,26 @@ export function mountGame(parentId = "game-root"): Phaser.Game | undefined {
 
     switch (target) {
       case "hero":
+        // Hero zone was retired in favor of a static Title screen; this
+        // target now routes there.
         game.scene.stop(SCENES.hub);
         game.scene.stop(SCENES.level);
-        game.scene.start(SCENES.hero);
+        game.scene.start(SCENES.title);
         break;
       case "hub":
-        game.scene.stop(SCENES.hero);
+        game.scene.stop(SCENES.title);
         game.scene.stop(SCENES.level);
         game.scene.start(SCENES.hub);
         break;
       case "orbit":
       case "memory-bank":
       case "nav-aid":
-        game.scene.stop(SCENES.hero);
+        game.scene.stop(SCENES.title);
         game.scene.stop(SCENES.hub);
         game.scene.start(SCENES.level, { slug: target });
         break;
       case "pitwall":
-        game.scene.stop(SCENES.hero);
+        game.scene.stop(SCENES.title);
         game.scene.stop(SCENES.level);
         game.scene.start(SCENES.hub);
         navPanel.showBlocks(
