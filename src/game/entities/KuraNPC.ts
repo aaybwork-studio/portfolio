@@ -71,24 +71,41 @@ export class KuraNPC {
     this.bubbleUnsub = undefined;
   }
 
-  /** Tween-walk horizontally to x, calling onArrive when done. */
+  /** Tween-walk horizontally to x, calling onArrive when done. Kept for any
+   * ground-based use; levels now use flyTo() for free 2D movement. */
   walkTo(x: number, onArrive?: () => void): void {
+    this.flyTo(x, this.gameObject.y, onArrive);
+  }
+
+  /** No-gravity tween move to a 2D point (x, y) — used by the guide in
+   * free-pilot levels, where he flies ahead to the next checkpoint and
+   * waits. Plays the run anim during travel, idle on arrival, and flips to
+   * face the horizontal component of travel. Aayush has no physics body in
+   * levels, so a plain tween is sufficient and avoids fighting gravity. */
+  flyTo(x: number, y: number, onArrive?: () => void): void {
     const def = SPRITES.aayush;
-    const distance = Math.abs(x - this.gameObject.x);
-    const speed = 120; // px/sec, guide pace
+    const dx = x - this.gameObject.x;
+    const dy = y - this.gameObject.y;
+    const distance = Math.hypot(dx, dy);
+    const speed = 160; // px/sec, guide pace (a bit brisker for open 2D space)
     const duration = Math.max(200, (distance / speed) * 1000);
 
     if (!this.isPlaceholder) {
       const sprite = this.gameObject as Phaser.GameObjects.Sprite;
-      sprite.setFlipX(x < this.gameObject.x);
+      if (Math.abs(dx) > 1) sprite.setFlipX(dx < 0);
       sprite.anims.play(`${def.key}-run`, true);
     }
 
     this.scene.tweens.add({
-      targets: [this.gameObject, this.label],
+      targets: this.gameObject,
       x,
+      y,
       duration,
       ease: "Linear",
+      onUpdate: () => {
+        this.label.x = this.gameObject.x;
+        this.label.y = this.gameObject.y - (this.gameObject.displayHeight ?? 48);
+      },
       onComplete: () => {
         if (!this.isPlaceholder) {
           const sprite = this.gameObject as Phaser.GameObjects.Sprite;
