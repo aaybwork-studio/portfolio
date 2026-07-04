@@ -40,15 +40,15 @@ export class Player {
       this.gameObject = sprite as PlayerGameObject;
       this.gameObject.body.setCollideWorldBounds(false);
 
-      // The character art sits centered in the frame with transparent padding,
-      // so use a tighter body than the full display size, offset to stand on
-      // the feet rather than the frame's vertical center.
-      const bodyWidth = def.displayWidth * 0.35;
-      const bodyHeight = def.displayHeight * 0.7;
+      // setSize/setOffset are in the sprite's SOURCE-FRAME space, so size the
+      // body from frameWidth/frameHeight (not display size). A tight body
+      // anchored to the character's feet.
+      const bodyWidth = def.frameWidth * 0.6;
+      const bodyHeight = def.frameHeight * 0.9;
       this.gameObject.body.setSize(bodyWidth, bodyHeight);
       this.gameObject.body.setOffset(
-        (def.displayWidth - bodyWidth) / 2,
-        def.displayHeight - bodyHeight,
+        (def.frameWidth - bodyWidth) / 2,
+        def.frameHeight - bodyHeight,
       );
 
       sprite.anims.play(`${def.key}-idle`, true);
