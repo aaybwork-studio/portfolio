@@ -1,5 +1,6 @@
-// Zone 1 — hub. Aayush NPC with dialog + résumé grant, portals to each
-// project level plus a PitWall highlight portal.
+// Zone 1 — hub. Aayush NPC with dialog + résumé grant, boardable themed
+// vehicles (parked) that launch into each project level plus a PitWall
+// highlight vehicle.
 
 import Phaser from "phaser";
 import { WORLD, SCENES, EVENTS } from "../config/world";
@@ -14,6 +15,7 @@ import { EventBus } from "../EventBus";
 import { checkpointProjects, pitwallProject } from "../../content";
 import { createBackground } from "../systems/Background";
 import type { Background } from "../systems/Background";
+import { getVehicle } from "../config/vehicles";
 
 const KURA_DIALOG = [
   "Hey, I'm Aayush. Interaction and UX designer.",
@@ -21,12 +23,15 @@ const KURA_DIALOG = [
   "Here, take my resume. You'll want it.",
 ];
 
-interface Portal {
+type VehicleGameObject = Phaser.GameObjects.Sprite | Phaser.GameObjects.Rectangle;
+
+interface HubVehicle {
   x: number;
+  y: number;
   target: NavTarget;
   label: string;
   color: number;
-  rect: Phaser.GameObjects.Rectangle;
+  obj: VehicleGameObject;
 }
 
 export class HubScene extends Phaser.Scene {
@@ -34,7 +39,7 @@ export class HubScene extends Phaser.Scene {
   private aayush!: KuraNPC;
   private dialogBox!: DialogBox;
   private contentPanel!: ContentPanel;
-  private portals: Portal[] = [];
+  private vehicles: HubVehicle[] = [];
   private hasTalkedToAayush = false;
   private domRoot!: HTMLElement;
   private prompt!: HTMLElement;
@@ -44,6 +49,8 @@ export class HubScene extends Phaser.Scene {
   /** Guards against an instant bounce back to Title on arrival — only armed
    * once the player has moved away from the left edge at least once. */
   private leftReturnArmed = false;
+  /** True while the board+launch sequence is playing — blocks re-trigger and input. */
+  private launching = false;
 
   constructor() {
     super(SCENES.hub);
@@ -77,36 +84,64 @@ export class HubScene extends Phaser.Scene {
     this.physics.add.collider(this.player.gameObject, ground);
     this.leftReturnArmed = false;
 
-    // Portals: three project levels + pitwall, spaced across remaining hub width.
-    const portalDefs: { target: NavTarget; label: string }[] = [
+    // Parked vehicles: three project levels + pitwall, spaced across remaining
+    // hub width. Each is boardable — E launches into that project's level.
+    const vehicleDefs: { target: NavTarget; label: string }[] = [
       ...checkpointProjects.map((p) => ({ target: p.slug as NavTarget, label: p.title })),
       { target: "pitwall", label: pitwallProject.title },
     ];
 
     const startX = w * 0.42;
-    const spacing = (w * 0.92 - startX) / Math.max(1, portalDefs.length - 1);
+    const spacing = (w * 0.92 - startX) / Math.max(1, vehicleDefs.length - 1);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    portalDefs.forEach((def, i) => {
+    vehicleDefs.forEach((def, i) => {
       const biomeKey = def.target === "pitwall" ? "pitwall" : def.target;
       const accent = BIOMES[biomeKey as keyof typeof BIOMES].palette.accent;
       const x = startX + spacing * i;
-      const rect = this.add.rectangle(x, groundY - 50, 40, 100, accent, 0.85);
-      rect.setStrokeStyle(2, accent);
-      this.physics.add.existing(rect, true);
+      const vehicleDef = getVehicle(def.target);
+
+      let obj: VehicleGameObject;
+      const vy = groundY - 50;
+      if (vehicleDef && !vehicleDef.usePlaceholder) {
+        const sprite = this.add.sprite(x, vy, vehicleDef.key);
+        sprite.setDisplaySize(vehicleDef.displayWidth, vehicleDef.displayHeight);
+        if (vehicleDef.tint !== undefined) sprite.setTint(vehicleDef.tint);
+        obj = sprite;
+      } else {
+        const w2 = vehicleDef?.displayWidth ?? 56;
+        const h2 = vehicleDef?.displayHeight ?? 44;
+        const color = vehicleDef?.placeholderColor ?? accent;
+        const rect = this.add.rectangle(x, vy, w2, h2, color, 0.9);
+        rect.setStrokeStyle(2, accent);
+        obj = rect;
+      }
 
       this.add
-        .text(x, groundY - 108, def.label, {
+        .text(x, vy - (obj.displayHeight / 2 + 14), vehicleDef?.label ?? def.label, {
           fontFamily: "monospace",
           fontSize: "11px",
           color: "#f5f5f7",
         })
         .setOrigin(0.5);
 
-      this.portals.push({ x, target: def.target, label: def.label, color: accent, rect });
+      if (!reduceMotion) {
+        this.tweens.add({
+          targets: obj,
+          y: vy - 6,
+          duration: 1400 + i * 120,
+          yoyo: true,
+          repeat: -1,
+          ease: "Sine.easeInOut",
+        });
+      }
+
+      this.vehicles.push({ x, y: vy, target: def.target, label: vehicleDef?.label ?? def.label, color: accent, obj });
     });
 
     this.cameras.main.setBounds(0, 0, w, h);
     this.physics.world.setBounds(0, 0, w, h);
+    this.cameras.main.setZoom(1.6);
     this.cameras.main.startFollow(this.player.gameObject, true, 0.1, 0.1);
 
     this.input.keyboard?.on("keydown-E", () => this.handleInteract());
@@ -123,6 +158,8 @@ export class HubScene extends Phaser.Scene {
   }
 
   private handleInteract(): void {
+    if (this.launching) return;
+
     // Aayush NPC interaction.
     const distToAayush = Math.abs(this.player.x - this.aayush.x);
     if (distToAayush <= WORLD.interactRadius && !this.hasTalkedToAayush) {
@@ -133,28 +170,71 @@ export class HubScene extends Phaser.Scene {
       return;
     }
 
-    // Portal interaction.
-    for (const portal of this.portals) {
-      const dist = Math.abs(this.player.x - portal.x);
+    // Vehicle interaction — board + launch.
+    for (const vehicle of this.vehicles) {
+      const dist = Math.abs(this.player.x - vehicle.x);
       if (dist <= WORLD.interactRadius) {
-        this.activatePortal(portal);
+        this.boardVehicle(vehicle);
         return;
       }
     }
   }
 
-  private activatePortal(portal: Portal): void {
-    if (portal.target === "pitwall") {
+  private boardVehicle(vehicle: HubVehicle): void {
+    if (vehicle.target === "pitwall") {
+      // Pitwall is a highlight — board the car but route to its content panel,
+      // matching the previous pitwall-portal behavior exactly.
       this.contentPanel.showBlocks(
         pitwallProject.title,
         pitwallProject.blocks.map((b) => ({ heading: b.heading, body: b.body })),
       );
       return;
     }
-    this.scene.start(SCENES.level, { slug: portal.target });
+    this.launchVehicle(vehicle);
+  }
+
+  /** Board + short launch animation, then transition to the project level. */
+  private launchVehicle(vehicle: HubVehicle): void {
+    if (this.launching) return;
+    this.launching = true;
+
+    this.promptUnsub?.();
+    this.promptUnsub = null;
+    this.promptTarget = null;
+
+    // Attach the player onto the vehicle.
+    const body = this.player.gameObject.body;
+    body.setVelocity(0, 0);
+    body.setAllowGravity(false);
+    this.player.gameObject.setPosition(vehicle.x, vehicle.y);
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const duration = reduceMotion ? 1 : 700;
+
+    // Themed launch direction: rocket goes up-and-out, everything else
+    // speeds off sideways (in the direction the player is facing/moved).
+    const goesUp = vehicle.target === "orbit";
+    const dx = goesUp ? 0 : 400;
+    const dy = goesUp ? -420 : -20;
+
+    this.cameras.main.pan(vehicle.x + dx * 0.3, vehicle.y, duration, "Sine.easeIn");
+
+    this.tweens.add({
+      targets: [vehicle.obj, this.player.gameObject],
+      x: `+=${dx}`,
+      y: `+=${dy}`,
+      scale: goesUp ? 0.4 : 0.8,
+      alpha: 0.85,
+      duration,
+      ease: "Cubic.easeIn",
+      onComplete: () => {
+        this.scene.start(SCENES.level, { slug: vehicle.target });
+      },
+    });
   }
 
   update(): void {
+    if (this.launching) return;
     this.player.update();
     this.bg.update(this.cameras.main);
     this.updateInteractPrompt();
@@ -181,7 +261,7 @@ export class HubScene extends Phaser.Scene {
   private updateInteractPrompt(): void {
     const candidates: { x: number; y: number }[] = [
       { x: this.aayush.x, y: this.aayush.y },
-      ...this.portals.map((p) => ({ x: p.x, y: p.rect.y })),
+      ...this.vehicles.map((v) => ({ x: v.x, y: v.y })),
     ];
 
     let nearest: { x: number; y: number } | null = null;
