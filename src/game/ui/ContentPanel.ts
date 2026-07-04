@@ -20,6 +20,7 @@ export class ContentPanel {
   private bodyEl: HTMLDivElement;
   private closeBtn: HTMLButtonElement;
   private visible = false;
+  private onCloseCb: (() => void) | null = null;
   private keyHandler = (e: KeyboardEvent) => {
     if (!this.visible) return;
     if (e.key === "e" || e.key === "E" || e.key === "Escape") {
@@ -111,14 +112,16 @@ export class ContentPanel {
     window.addEventListener("keydown", this.keyHandler);
   }
 
-  /** Show a single checkpoint's title + body. */
-  show(item: ContentPanelItem): void {
+  /** Show a single checkpoint's title + body. `onClose` fires once, the next
+   * time the panel is dismissed (E/Esc/close button/click-away). */
+  show(item: ContentPanelItem, onClose?: () => void): void {
     this.titleEl.textContent = item.title;
     this.bodyEl.innerHTML = "";
     const p = document.createElement("p");
     p.textContent = item.body;
     p.style.margin = "0";
     this.bodyEl.appendChild(p);
+    this.onCloseCb = onClose ?? null;
     this.open();
   }
 
@@ -158,8 +161,12 @@ export class ContentPanel {
   }
 
   hide(): void {
+    if (!this.visible) return;
     this.visible = false;
     this.overlay.style.display = "none";
+    const cb = this.onCloseCb;
+    this.onCloseCb = null;
+    cb?.();
   }
 
   destroy(): void {
