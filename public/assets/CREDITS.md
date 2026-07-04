@@ -155,3 +155,21 @@ re-tinting, without needing new art.
 These preview files are for human/reviewer inspection only and are not
 required at runtime — safe to delete if disk space matters, the engine
 reads the per-layer / per-sheet files listed above.
+
+## Vehicles — `public/assets/vehicles/` (added 2026-07-04)
+
+Four single-frame, side/top-view pixel vehicle sprites, all CC0, all with
+alpha transparency. Sourced individually from OpenGameArt.org (license
+field confirmed as `CC0` on each page before download).
+
+| File | Size | Alpha | Source pack | Author | Page URL | Direct file |
+|---|---|---|---|---|---|---|
+| `rocket.png` | 32x32 | yes | "Spaceship set 32x32px" | (OpenGameArt user, see page) | https://opengameart.org/content/spaceship-set-32x32px | https://opengameart.org/sites/default/files/player2.png |
+| `car.png` | 32x32 | yes | "Sports cars pixelart sprites" (`f1car.png`) | (OpenGameArt user, see page) | https://opengameart.org/content/sports-cars-pixelart-sprites | https://opengameart.org/sites/default/files/f1car.png |
+| `boat.png` | 141x100 | yes | "Ship / Destroyed Ship" (`ship_11.png`) | (OpenGameArt user, see page) | https://opengameart.org/content/ship-destroyed-ship | https://opengameart.org/sites/default/files/ship_11.png |
+| `pod.png` | 32x32 | yes | "Spaceship set 32x32px" (`enemy_4.png`, reused as futuristic pod/rover) | (OpenGameArt user, see page) | https://opengameart.org/content/spaceship-set-32x32px | https://opengameart.org/sites/default/files/enemy_4.png |
+
+License: **CC0** for all four (page's License(s) field read `CC0` on each
+source page at time of download). `rocket.png` and `pod.png` come from the
+same pack (two different ships in the set), chosen for a cohesive sci-fi
+look. Not yet wired into `src/game/config/*` — these are raw assets only.
