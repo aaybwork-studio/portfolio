@@ -173,3 +173,29 @@ License: **CC0** for all four (page's License(s) field read `CC0` on each
 source page at time of download). `rocket.png` and `pod.png` come from the
 same pack (two different ships in the set), chosen for a cohesive sci-fi
 look. Not yet wired into `src/game/config/*` — these are raw assets only.
+
+## Vehicles (side-view set) — `public/assets/vehicles/` (added 2026-07-04, batch 2)
+
+Second batch, `_side.png` suffix naming, downloaded via `urllib` from
+OpenGameArt.org direct file URLs. Each source page's License(s) field was
+grepped from the raw HTML and confirmed `CC0` before download.
+
+| File | Size | Side-view? | Alpha | Source pack | Page URL | Direct file | License |
+|---|---|---|---|---|---|---|---|
+| `rocket_side.png` | 128x32 (4x32px anim frames) | Yes (side-scroller shmup ship) | yes | "Animated spaceships" (`Lightning.png`) | https://opengameart.org/content/animated-spaceships | https://opengameart.org/sites/default/files/Ships_1.zip | CC0 |
+| `pod_side.png` | 128x32 (4x32px anim frames) | Yes (side-scroller shmup ship, UFO/pod silhouette) | yes | "Animated spaceships" (`UFO.png`) | https://opengameart.org/content/animated-spaceships | https://opengameart.org/sites/default/files/Ships_1.zip | CC0 |
+| `car_side.png` | 210x83 | Yes | yes | "2D Pixel Car (Side view)" (`PixelCar.png`) | https://opengameart.org/content/2d-pixel-car-side-view | https://opengameart.org/sites/default/files/PixelCar.png | CC0 |
+| `boat_side.png` | 112x168 | Partial — page labeled generically "the boat"; image reads as a mostly-broadside/side profile hull, not a strict flat side-elevation | yes | "The boat" (`Boat.png`) | https://opengameart.org/content/the-boat | https://opengameart.org/sites/default/files/Boat.png | CC0 |
+
+Notes:
+- `rocket_side.png` and `pod_side.png` are both extracted from the same
+  `Ships_1.zip` archive (8 ships total: Dove, Ligher, Lightning, Ninja,
+  Paranoid, Saboteur, Turtle, UFO) — each file is a 4-frame animation strip,
+  32x32 px per frame, laid out horizontally (128x32 total). `Lightning.png`
+  was chosen as the rocket for its sleek pointed-nose silhouette; `UFO.png`
+  was chosen as the pod/hovercraft for its rounded saucer shape.
+- A dedicated hovercraft/pod-specific pack could not be found quickly, so
+  the UFO ship was reused as the closest side-view pod analog — flagged
+  here for visibility, not a blocker.
+- These files are raw assets only, not yet wired into
+  `src/game/config/*`.
