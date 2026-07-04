@@ -1,7 +1,7 @@
 // Title/start screen. Replaces the walkable Hero zone as the entry point.
-// Static backdrop (reuses createBackground's hero biome), a DOM overlay with
-// the hero text + PLAY button, and a handful of placeholder "floating"
-// project-icon squares. Play -> HubScene.
+// Static backdrop (reuses createBackground's hero biome) plus a minimal DOM
+// overlay: name, subtle role/tagline, PLAY button, and a low-opacity hint.
+// Play -> HubScene.
 
 import Phaser from "phaser";
 import { SCENES, EVENTS } from "../config/world";
@@ -67,14 +67,15 @@ export class TitleScene extends Phaser.Scene {
       pointer-events: none;
       padding: 24px;
       font-family: var(--font-mono, monospace);
+      gap: 0;
     `;
 
     const name = document.createElement("h1");
     name.textContent = "Aayush Bhandari";
     name.style.cssText = `
-      margin: 0 0 10px;
+      margin: 0 0 14px;
       font-family: var(--font-display, monospace);
-      font-size: clamp(1.2rem, 4vw, 2rem);
+      font-size: clamp(1.8rem, 6vw, 3.2rem);
       font-weight: 400;
       color: var(--ink, #f5f5f7);
       letter-spacing: 0.02em;
@@ -83,18 +84,20 @@ export class TitleScene extends Phaser.Scene {
     const role = document.createElement("div");
     role.textContent = "Interaction & UX Designer";
     role.style.cssText = `
-      font-size: clamp(0.85rem, 2vw, 1.05rem);
-      color: var(--accent, #00e5ff);
-      margin-bottom: 8px;
+      font-size: 0.85rem;
+      color: var(--ink-dim, #a6a6b3);
+      opacity: 0.7;
+      margin-bottom: 6px;
     `;
 
     const tagline = document.createElement("div");
     tagline.textContent = "I make simple, clear, immersive digital experiences.";
     tagline.style.cssText = `
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--ink-dim, #a6a6b3);
-      max-width: 480px;
-      margin-bottom: 28px;
+      opacity: 0.6;
+      max-width: 420px;
+      margin-bottom: 36px;
     `;
 
     const playBtn = document.createElement("button");
@@ -103,9 +106,9 @@ export class TitleScene extends Phaser.Scene {
     playBtn.style.cssText = `
       pointer-events: auto;
       cursor: pointer;
-      padding: 12px 32px;
+      padding: 14px 40px;
       font-family: var(--font-mono, monospace);
-      font-size: 0.95rem;
+      font-size: 1rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--bg, #0a0a12);
@@ -124,12 +127,14 @@ export class TitleScene extends Phaser.Scene {
     playBtn.addEventListener("click", () => this.scene.start(SCENES.hub));
 
     const hint = document.createElement("div");
-    hint.textContent = "Press Enter / Space / E to play";
+    hint.textContent = "Press Enter to enter the game";
     hint.style.cssText = `
-      margin-top: 14px;
+      margin-top: 18px;
+      font-family: var(--font-mono, monospace);
       font-size: 0.68rem;
       color: var(--ink-dim, #a6a6b3);
       letter-spacing: 0.04em;
+      opacity: 0.5;
     `;
 
     root.appendChild(name);
@@ -137,48 +142,6 @@ export class TitleScene extends Phaser.Scene {
     root.appendChild(tagline);
     root.appendChild(playBtn);
     root.appendChild(hint);
-
-    // Placeholder "floating" project-icon squares. TODO: swap each square for
-    // a proper 8-bit icon per project — Orbit = space motif, Memory Bank =
-    // locket/pin, Nav-Aid = navigation waypoint/compass, PitWall = F1
-    // tires/cars. Positions/colors are placeholders only.
-    const floaters: { top: string; left: string; color: string; delay: string }[] = [
-      { top: "16%", left: "12%", color: BIOMES.orbit.palette.accent.toString(16), delay: "0s" },
-      { top: "24%", left: "82%", color: BIOMES.hub.palette.accent.toString(16), delay: "0.6s" },
-      { top: "70%", left: "18%", color: "ffb400", delay: "1.1s" },
-      { top: "68%", left: "80%", color: BIOMES.pitwall.palette.accent.toString(16), delay: "1.6s" },
-    ];
-
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    for (const f of floaters) {
-      const el = document.createElement("div");
-      el.className = "title-floater";
-      el.style.cssText = `
-        position: absolute;
-        top: ${f.top};
-        left: ${f.left};
-        width: 20px;
-        height: 20px;
-        background: #${f.color.padStart(6, "0")};
-        border: 2px solid rgba(245,245,247,0.6);
-        image-rendering: pixelated;
-        ${reduceMotion ? "" : `animation: title-drift 4.5s ease-in-out ${f.delay} infinite;`}
-      `;
-      root.appendChild(el);
-    }
-
-    if (!reduceMotion && !document.getElementById("title-drift-keyframes")) {
-      const style = document.createElement("style");
-      style.id = "title-drift-keyframes";
-      style.textContent = `
-        @keyframes title-drift {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-14px); }
-        }
-      `;
-      document.head.appendChild(style);
-    }
 
     parent.appendChild(root);
     this.domRoot = root;

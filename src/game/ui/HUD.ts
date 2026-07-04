@@ -27,6 +27,8 @@ export class HUD {
   private resumeLink: HTMLAnchorElement;
   private hintEl: HTMLDivElement;
   private zoneEl: HTMLDivElement;
+  private topBar!: HTMLDivElement;
+  private bottomBar!: HTMLDivElement;
   private hintTimeout: ReturnType<typeof setTimeout> | null = null;
   private unsubscribers: (() => void)[] = [];
 
@@ -92,6 +94,7 @@ export class HUD {
     `;
     topBar.appendChild(this.resumeLink);
     this.container.appendChild(topBar);
+    this.topBar = topBar;
 
     // Bottom bar: teleport nav + read-mode menu
     const bottomBar = document.createElement("div");
@@ -168,6 +171,7 @@ export class HUD {
     bottomBar.appendChild(readWrap);
 
     this.container.appendChild(bottomBar);
+    this.bottomBar = bottomBar;
 
     // Control hint, centered
     this.hintEl = document.createElement("div");
@@ -227,6 +231,15 @@ export class HUD {
   private onZoneChanged(payload: unknown): void {
     const zone = (payload as { zone?: string } | undefined)?.zone;
     this.zoneEl.textContent = zone ?? "";
+
+    const isTitle = zone === "Title";
+    this.topBar.style.display = isTitle ? "none" : "flex";
+    this.bottomBar.style.display = isTitle ? "none" : "flex";
+    if (isTitle) {
+      this.hintEl.style.display = "none";
+    } else {
+      this.hintEl.style.display = "";
+    }
   }
 
   /** Call to fade out the hint immediately (e.g. on first player move). */
